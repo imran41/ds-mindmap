@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bihar Digital Data & Network | Learning Resources & Mind Maps</title>
+    <meta name="description"
+        content="Bihar Digital Data & Network – Premium learning resources, mind maps, and data analytics modules for modern learners.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            /* ── BDDN Brand Theme (navy / cyan / teal) ── */
+            --navy:        #0d1b3e;
+            --navy2:       #122257;
+            --blue:        #1a4da2;
+            --cyan:        #00b4d8;
+            --teal:        #00c9b1;
+            --gold:        #f0a500;
+            --white:       #ffffff;
+            --light:       #f0f6ff;
+            --gray:        #6b7a9b;
+            --text:        #1a2342;
+            --card-bg:     rgba(255, 255, 255, 0.05);
+            --radius:      16px;
+            --transition:  0.35s cubic-bezier(.4, 0, .2, 1);
+
+            /* Legacy aliases kept so no HTML changes needed */
+            --gold-primary:  var(--cyan);
+            --gold-dark:     #0090b8;
+            --dark-bg:       var(--navy);
+            --darker-bg:     #080e20;
+            --white:         #ffffff;
+            --text-light:    rgba(255, 255, 255, 0.78);
+            --text-muted:    rgba(255, 255, 255, 0.45);
+            --border-light:  rgba(0, 180, 216, 0.15);
+            --shadow-gold:   rgba(0, 180, 216, 0.3) 0px 8px 28px;
+            --font-heading:  'DM Sans', sans-serif;
+            --font-body:     'Instrument Sans', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--dark-bg);
+            color: var(--white);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+        }
+
+        /* ── Background texture ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0, 180, 216, 0.13) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 90% 80%, rgba(0, 201, 177, 0.07) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 30% at 10% 50%, rgba(26, 77, 162, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Grid dot overlay (BDDN style) ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(circle, rgba(0, 180, 216, 0.12) 1px, transparent 1px);
+            background-size: 36px 36px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 48px;
+            border-bottom: 1px solid var(--border-light);
+            background: rgba(9, 13, 19, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .navbar-logo {
+            height: 35px;
+            width: auto;
+            border-radius: 6px;
+        }
+
+        .navbar-name {
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--white);
+            letter-spacing: 0.01em;
+            line-height: 1.3;
+        }
+
+        .navbar-name span {
+            display: block;
+            font-size: 9px;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .navbar-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 11px;
+            border-radius: 100px;
+            border: 1px solid rgba(0, 180, 216, 0.35);
+            background: rgba(0, 180, 216, 0.1);
+            font-family: var(--font-body);
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--cyan);
+            letter-spacing: 0.04em;
+        }
+
+        .navbar-badge::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 72px 20px 56px;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 100px;
+            border: 1px solid rgba(0, 180, 216, 0.3);
+            background: rgba(0, 180, 216, 0.08);
+            font-family: var(--font-body);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--cyan);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 26px;
+            animation: fadeInDown 0.6s ease both;
+        }
+
+        .hero-eyebrow svg {
+            width: 11px;
+            height: 11px;
+            fill: var(--cyan);
+        }
+
+        .hero-title {
+            font-family: var(--font-heading);
+            font-size: clamp(30px, 4.8vw, 54px);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            color: var(--white);
+            max-width: 656px;
+            margin-bottom: 18px;
+            animation: fadeInDown 0.7s ease 0.1s both;
+        }
+
+        .hero-title .gold {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--teal) 50%, #00b4d8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-family: var(--font-body);
+            font-size: clamp(12px, 1.6vw, 14px);
+            font-weight: 400;
+            color: var(--text-light);
+            max-width: 416px;
+            line-height: 1.7;
+            margin-bottom: 51px;
+            animation: fadeInDown 0.7s ease 0.2s both;
+        }
+
+        /* ── DIVIDER ── */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            margin-bottom: 38px;
+            width: 100%;
+            max-width: 720px;
+            animation: fadeInDown 0.7s ease 0.3s both;
+        }
+
+        .section-divider hr {
+            flex: 1;
+            border: none;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .section-divider span {
+            font-family: var(--font-body);
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        /* ── CARDS GRID ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(224px, 1fr));
+            gap: 19px;
+            width: 100%;
+            max-width: 784px;
+            animation: fadeInUp 0.8s ease 0.35s both;
+        }
+
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 27px 24px;
+            text-decoration: none;
+            color: var(--white);
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s ease,
+                border-color 0.35s ease,
+                background 0.35s ease;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(0, 180, 216, 0.08) 0%, rgba(0, 201, 177, 0.04) 60%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 180, 216, 0.45);
+            background: rgba(0, 180, 216, 0.05);
+            box-shadow:
+                var(--shadow-gold),
+                rgba(0, 0, 0, 0.4) 0px 20px 40px;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        /* Card corner accent */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 64px;
+            height: 64px;
+            background: radial-gradient(circle at top right, rgba(0, 180, 216, 0.18) 0%, transparent 70%);
+            border-radius: 0 16px 0 0;
+        }
+
+        .card-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 100px;
+            border: 1px solid rgba(0, 180, 216, 0.3);
+            background: rgba(0, 180, 216, 0.1);
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--cyan);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            width: fit-content;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--teal) 100%);
+            color: #0a1a2e;
+            font-family: var(--font-body);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            width: fit-content;
+            position: relative;
+            z-index: 1;
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
+        }
+
+        .card:hover .card-cta {
+            box-shadow: var(--shadow-gold);
+            transform: scale(1.03);
+        }
+
+        .card-cta svg {
+            width: 11px;
+            height: 11px;
+            transition: transform 0.25s ease;
+        }
+
+        .card:hover .card-cta svg {
+            transform: translateX(3px);
+        }
+
+        /* ── STATS BAR ── */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 38px;
+            margin-top: 58px;
+            padding: 22px 32px;
+            border-radius: 13px;
+            border: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.02);
+            max-width: 544px;
+            width: 100%;
+            animation: fadeInUp 0.8s ease 0.5s both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: var(--font-heading);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--cyan);
+            letter-spacing: -0.03em;
+            line-height: 1;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            font-family: var(--font-body);
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 29px;
+            background: var(--border-light);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative;
+            z-index: 1;
+            border-top: 1px solid var(--border-light);
+            background: var(--darker-bg);
+            padding: 26px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-logo {
+            height: 26px;
+            width: auto;
+            border-radius: 5px;
+            opacity: 0.8;
+        }
+
+        .footer-copy {
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .footer-copy strong {
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .footer-link {
+            font-family: var(--font-body);
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--gold-primary);
+        }
+
+        .footer-link.primary {
+            color: var(--cyan);
+            font-weight: 600;
+        }
+
+        .footer-link.primary:hover {
+            color: var(--teal);
+        }
+
+        /* ── SEARCH BAR ── */
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            margin-bottom: 32px;
+            animation: fadeInDown 0.7s ease 0.32s both;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 44px 12px 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--white);
+            font-family: var(--font-body);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            border-color: rgba(0, 180, 216, 0.55);
+            background: rgba(0, 180, 216, 0.06);
+            box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.12);
+        }
+
+        .search-input:focus + .search-icon,
+        .search-wrapper:focus-within .search-icon {
+            color: var(--cyan);
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+
+        .search-clear:hover {
+            color: var(--white);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .search-clear.visible {
+            display: flex;
+        }
+
+        .search-clear svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .no-results {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 48px 24px;
+            color: var(--text-muted);
+            font-family: var(--font-body);
+            font-size: 13px;
+        }
+
+        .no-results.visible {
+            display: flex;
+        }
+
+        .no-results-icon {
+            font-size: 32px;
+            opacity: 0.5;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 16px 24px;
+            }
+
+            .navbar-badge {
+                display: none;
+            }
+
+            .hero {
+                padding: 60px 20px 50px;
+            }
+
+            .stats-bar {
+                gap: 24px;
+                padding: 22px 24px;
+            }
+
+            footer {
+                padding: 28px 24px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .footer-right {
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .stat-divider {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── NAVBAR ── -->
+    <nav class="navbar">
+        <a href="https://www.bddn.in" class="navbar-brand" target="_blank">
+            <img src="https://bddn.in/bddn_logo.webp" alt="BDDN Logo" class="navbar-logo"
+                onerror="this.onerror=null; this.src='logo.jpg';">
+            <div class="navbar-name">
+                Bihar Digital Data &amp; Network
+                <span>Learn Digital, Build Future</span>
+            </div>
+        </a>
+        <div class="navbar-badge">Learning Hub</div>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <main class="hero">
+
+        <div class="hero-eyebrow">
+            <svg viewBox="0 0 16 16">
+                <path d="M8 1l1.8 3.6L14 5.5l-3 2.9.7 4.1L8 10.4l-3.7 2.1.7-4.1L2 5.5l4.2-.9z" />
+            </svg>
+            Free Learning Resources
+        </div>
+
+        <h1 class="hero-title">
+            Module <span class="gold">&</span> Mind Maps<br>
+        </h1>
+
+        <p class="hero-subtitle">
+            Structured, visually engaging learning resources crafted by
+            Bihar Digital Data &amp; Network to help you build real-world
+            data &amp; tech skills faster.
+        </p>
+
+        <div class="section-divider">
+            <hr>
+            <span>Explore Resources</span>
+            <hr>
+        </div>
+
+        <!-- ── SEARCH BAR ── -->
+        <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="9" cy="9" r="6"/><path d="M15 15l3 3"/>
+            </svg>
+            <input
+                id="search-input"
+                class="search-input"
+                type="text"
+                placeholder="Search resources — Python, SQL, Analytics…"
+                autocomplete="off"
+                spellcheck="false">
+            <button class="search-clear" id="search-clear" aria-label="Clear search">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M4 4l8 8M12 4l-8 8"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- ── CARDS ── -->
+        <div class="cards-grid" id="cards-grid">
+            <!-- Dynamic mind map cards will load here -->
+
+            <!-- Data Analytics Module -->
+            <a href="https://drive.google.com/drive/folders/1t6tsjsFGi80xF6o1-NHWI2eUTtEJVkeJ?usp=drive_link"
+                class="card" id="card-analytics" target="_blank" rel="noopener noreferrer">
+                <div class="card-tag">Module</div>
+                <h2 class="card-title">Data Analytics Module</h2>
+                <div class="card-cta">
+                    Open Module
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M3 8h10M9 4l4 4-4 4" />
+                    </svg>
+                </div>
+            </a>
+        </div>
+
+        <!-- ── STATS BAR ── -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="stats-resources-count">1+</div>
+                <div class="stat-label">Resources</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Free Access</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-value">Visual</div>
+                <div class="stat-label">Learning Style</div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <div class="stat-value">2026</div>
+                <div class="stat-label">Est. Batch</div>
+            </div>
+        </div>
+
+        <!-- No results message -->
+        <div class="no-results" id="no-results">
+            <div class="no-results-icon">🔍</div>
+            <span>No resources found for your search.</span>
+        </div>
+
+    </main>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <div class="footer-left">
+            <img src="https://bddn.in/bddn_logo.webp" alt="BDDN Logo" class="footer-logo"
+                onerror="this.onerror=null; this.src='logo.jpg';">
+            <div class="footer-copy">
+                <strong>Bihar Digital Data &amp; Network</strong><br>
+                © 2026 All Rights Reserved.
+            </div>
+        </div>
+        <div class="footer-right">
+            <a href="https://www.bddn.in" target="_blank" class="footer-link primary">www.bddn.in</a>
+        </div>
+    </footer>
+
+    <!-- Include CORS-safe script fallback for local file:// protocol access -->
+    <script src="mindmap/list.js" onerror="console.warn('mindmap/list.js not found or failed to load')"></script>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('search-clear');
+        const cardsGrid = document.getElementById('cards-grid');
+        const noResults = document.getElementById('no-results');
+        const statsResourcesCount = document.getElementById('stats-resources-count');
+
+        // Helper to format file names beautifully
+        function formatTitle(filename) {
+            let name = filename.replace(/\.html$/i, '');
+            
+            // Remove common prefixes
+            if (name.toLowerCase().startsWith('mindmap-') || name.toLowerCase().startsWith('mindmap_')) {
+                name = name.substring(8);
+            }
+            
+            // Replace separators with spaces
+            name = name.replace(/[-_]/g, ' ');
+            
+            // Title Case
+            name = name.split(' ').map(word => {
+                const upper = word.toUpperCase();
+                if (['SQL', 'BI', 'PDF', 'RAG'].includes(upper)) {
+                    return upper;
+                }
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            }).join(' ');
+            
+            // Always append "Mind Map" if it doesn't already end with it
+            if (!name.toLowerCase().endsWith('mind map')) {
+                name = name + ' Mind Map';
+            }
+            return name;
+        }
+
+        // Function to render a card element
+        function createCardHTML(filename, title) {
+            const cleanId = filename.replace(/\.html$/i, '').replace(/[^a-zA-Z0-9]/g, '-');
+            return `
+                <a href="mindmap/${filename}" class="card dynamic-card" id="card-${cleanId}">
+                    <div class="card-tag">Mind Map</div>
+                    <h2 class="card-title">${title}</h2>
+                    <div class="card-cta">
+                        Open Mind Map
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M3 8h10M9 4l4 4-4 4" />
+                        </svg>
+                    </div>
+                </a>
+            `;
+        }
+
+        // Fetch directory and load files
+        async function fetchMindmaps() {
+            let files = [];
+
+            try {
+                // Try scanning the directory directly (works if server has directory listing enabled)
+                if (window.location.protocol !== 'file:') {
+                    const response = await fetch('mindmap/');
+                    if (response.ok) {
+                        const html = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const links = Array.from(doc.querySelectorAll('a'));
+
+                        links.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href && href.endsWith('.html') && !href.startsWith('/') && !href.startsWith('..')) {
+                                const filename = href.split('/').pop();
+                                if (!files.includes(filename)) {
+                                    files.push(filename);
+                                }
+                            }
+                        });
+                    }
+                }
+            } catch (dirError) {
+                console.warn("Could not list mindmap folder directory directly:", dirError.message);
+            }
+
+            // Fallback 1: Try window.mindmapFiles (CORS-safe fallback for file:// or offline files)
+            if (files.length === 0 && window.mindmapFiles && Array.isArray(window.mindmapFiles)) {
+                files = window.mindmapFiles;
+            }
+
+            // Fallback 2: If local script fallback is not loaded, try fetching list.json
+            if (files.length === 0) {
+                try {
+                    const response = await fetch('mindmap/list.json');
+                    if (response.ok) {
+                        const list = await response.json();
+                        if (Array.isArray(list)) {
+                            files = list.filter(f => typeof f === 'string' && f.endsWith('.html'));
+                        }
+                    }
+                } catch (listError) {
+                    console.warn("Could not read fallback list.json:", listError.message);
+                }
+            }
+
+            // Render cards if files were found
+            if (files.length > 0) {
+                const cardsHTML = files.map(file => createCardHTML(file, formatTitle(file))).join('');
+                cardsGrid.insertAdjacentHTML('afterbegin', cardsHTML);
+            } else {
+                // Show dynamic listing fallback error if ALL attempts failed completely
+                cardsGrid.insertAdjacentHTML('afterbegin', `
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: left; max-width: 500px; margin: 20px auto; padding: 24px; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; background: rgba(239, 68, 68, 0.02);">
+                        <p style="margin-bottom: 8px; font-weight: 700; color: #f87171; font-size: 14px;">Unable to scan mindmap folder automatically</p>
+                        <p style="margin-bottom: 12px; font-size: 12px; line-height: 1.5; color: var(--text-muted);">
+                            Browsers block directory listings on some configurations or offline. Create a file named <code style="color: #67e8f9; background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 4px;">mindmap/list.js</code> to fix this offline:
+                        </p>
+                        <pre style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-light); margin: 0; color: #a5f3fc; font-family: monospace; font-size: 11px;">window.mindmapFiles = [\n  "data_preprocessing.html",\n  "data_science_interview.html"\n];</pre>
+                    </div>
+                `);
+            }
+
+            // Update stats count dynamically (files.length + 1 static module card)
+            if (statsResourcesCount) {
+                statsResourcesCount.textContent = (files.length + 1) + '+';
+            }
+
+            // Initial call to filter cards in case search input has text
+            filterCards(searchInput.value);
+        }
+
+        function filterCards(query) {
+            const q = query.trim().toLowerCase();
+            let visible = 0;
+            
+            // Select cards dynamically so we match both static and newly generated dynamic cards
+            const allCards = document.querySelectorAll('.card');
+
+            allCards.forEach(card => {
+                const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+                const tag   = card.querySelector('.card-tag')?.textContent.toLowerCase() || '';
+                const match = !q || title.includes(q) || tag.includes(q);
+
+                card.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+
+            noResults.classList.toggle('visible', visible === 0);
+            clearBtn.classList.toggle('visible', q.length > 0);
+        }
+
+        searchInput.addEventListener('input', () => filterCards(searchInput.value));
+
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterCards('');
+            searchInput.focus();
+        });
+
+        searchInput.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                filterCards('');
+            }
+        });
+
+        // Run
+        fetchMindmaps();
+    </script>
+</body>
+
+</html>
