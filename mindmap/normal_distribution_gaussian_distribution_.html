@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Distribution (Gaussian Distribution) - Mind Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --bg-grid: rgba(255, 255, 255, 0.035);
+            --panel: #101a2e;
+            --panel-border: #1d2c47;
+            --ink: #E6EDF7;
+            --muted: #8694ab;
+            --root: #67E8F9;
+            --c1: #F2B84B;
+            --c2: #2DD4BF;
+            --c3: #FB7472;
+            --c4: #9B8CFF;
+            --c5: #4EA8DE;
+            --c6: #A3E635;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse 70% 50% at 18% 12%, rgba(103, 232, 249, 0.06), transparent 60%);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.65));
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        button {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 7px;
+            border: 1px solid var(--panel-border);
+            background: #15213a;
+            color: var(--ink);
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--root);
+            background: #192742;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            align-self: center;
+            margin-left: 4px;
+            min-width: 42px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        #tree-scaled {
+            transform-origin: top left;
+            padding: 50px 70px 100px;
+        }
+
+        #tree-inner {
+            position: relative;
+            display: inline-block;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .node-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+            margin-left: 78px;
+        }
+
+        .node-self {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            border: 1.5px solid var(--c, var(--root));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+            box-shadow:
+                0 4px 16px -8px rgba(0, 0, 0, 0.7),
+                0 0 16px -6px var(--c, var(--root));
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0;
+            animation: pop-in .42s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .node-self.is-root {
+            padding: 14px 22px;
+            border-width: 2px;
+            font-size: 15.5px;
+        }
+
+        .n-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .node-self.is-root .n-title {
+            font-size: 15.5px;
+            color: var(--root);
+        }
+
+        .n-detail {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .toggle {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #0b1220;
+            border: 1.5px solid var(--c, var(--root));
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .toggle:hover {
+            box-shadow: 0 0 10px -2px var(--c, var(--root));
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.connectors path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        svg.connectors circle {
+            r: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrap" id="canvas-wrap">
+        <div class="toolbar">
+            <button id="zoom-out">−</button>
+            <span class="zoom-label" id="zoom-label">100%</span>
+            <button id="zoom-in">+</button>
+            <button id="zoom-reset">Reset</button>
+            <div class="spacer"></div>
+            <button id="btn-expand">Expand All</button>
+            <button id="btn-collapse" style="margin-right: 8px;">Collapse All</button>
+        </div>
+        <div id="tree-scaled">
+            <div id="tree-inner"></div>
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 28px; background: rgba(11, 18, 32, 0.85); backdrop-filter: blur(4px); border-top: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; z-index: 10;">
+        Created by <b>Bihar Digital Data & Network</b> (<a href="https://bddn.in" target="_blank" style="color: var(--root); text-decoration: none;">bddn.in</a>)
+    </footer>
+
+    <script>
+        const treeData = {"id":0,"title":"Normal Distribution (Gaussian Distribution)","detail":null,"children":[{"id":1,"title":"Introduction","detail":null,"children":[{"id":2,"title":"Definition","detail":null,"children":[{"id":3,"title":"A continuous probability distribution where data is symmetrically distributed around the mean.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":4,"title":"Also Known As","detail":null,"children":[{"id":5,"title":"Gaussian Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":6,"title":"Bell Curve","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":7,"title":"Importance","detail":null,"children":[{"id":8,"title":"Most common distribution in statistics","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":9,"title":"Foundation of Machine Learning","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":10,"title":"Hypothesis Testing","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":11,"title":"Confidence Interval","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":12,"title":"Data Analysis","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":13,"title":"Interview Question","detail":null,"children":[{"id":14,"title":"Q","detail":"What is Normal Distribution?","children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":15,"title":"A","detail":"It is a symmetric probability distribution where mean, median and mode are equal.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":true,"depth":1,"color":"c1"},{"id":16,"title":"How Normal Distribution is Created","detail":null,"children":[{"id":17,"title":"Raw Dataset","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":18,"title":"Histogram","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":19,"title":"Kernel Density Estimation (KDE)","detail":null,"children":[{"id":20,"title":"Smooths Histogram","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":21,"title":"Produces Probability Density Function (PDF)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":22,"title":"Bell Curve","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":23,"title":"Interview Question","detail":null,"children":[{"id":24,"title":"Q","detail":"How do we obtain a Normal Distribution graph?","children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":25,"title":"A:","detail":null,"children":[{"id":26,"title":"Collect continuous data","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":27,"title":"Plot Histogram","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":28,"title":"Apply KDE","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":29,"title":"Obtain smooth bell-shaped PDF.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"}],"collapsed":true,"depth":1,"color":"c2"},{"id":30,"title":"Probability Density Function (PDF)","detail":null,"children":[{"id":31,"title":"Represents likelihood of values","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":32,"title":"Total Area = 1","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":33,"title":"Used for Continuous Variables","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":34,"title":"Interview Question","detail":null,"children":[{"id":35,"title":"Q","detail":"What is PDF?","children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":36,"title":"A","detail":"PDF describes how probability is distributed over continuous values.","children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"}],"collapsed":true,"depth":1,"color":"c3"},{"id":37,"title":"Properties of Normal Distribution","detail":null,"children":[{"id":38,"title":"Symmetric Curve","detail":null,"children":[{"id":39,"title":"Left Side = Right Side","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":40,"title":"50% observations left of Mean","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":41,"title":"50% observations right of Mean","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"},{"id":42,"title":"Mean = Median = Mode","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":43,"title":"Bell Shaped Curve","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":44,"title":"Single Peak (Unimodal)","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":45,"title":"Total Area = 1","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":46,"title":"Tails extend infinitely","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":47,"title":"Controlled by","detail":null,"children":[{"id":48,"title":"Mean (μ)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":49,"title":"Standard Deviation (σ)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"},{"id":50,"title":"Interview Question","detail":null,"children":[{"id":51,"title":"Q","detail":"What are the properties of Normal Distribution?","children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":52,"title":"A:","detail":null,"children":[{"id":53,"title":"Symmetric","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":54,"title":"Mean = Median = Mode","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":55,"title":"Bell-shaped","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":56,"title":"Total Area = 1","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":57,"title":"Controlled by μ and σ.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"}],"collapsed":true,"depth":1,"color":"c4"},{"id":58,"title":"Mean (μ)","detail":null,"children":[{"id":59,"title":"Center of Distribution","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":60,"title":"Divides Curve into Two Equal Halves","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":61,"title":"Represents Average","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":62,"title":"Interview Question","detail":null,"children":[{"id":63,"title":"Q","detail":"What is μ in Normal Distribution?","children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":64,"title":"A","detail":"μ represents the center (mean) of the distribution.","children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"}],"collapsed":true,"depth":1,"color":"c5"},{"id":65,"title":"Standard Deviation (σ)","detail":null,"children":[{"id":66,"title":"Measures Spread","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":67,"title":"Larger σ","detail":null,"children":[{"id":68,"title":"Wider Curve","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":69,"title":"Smaller σ","detail":null,"children":[{"id":70,"title":"Narrow Curve","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":71,"title":"Controls Variability","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":72,"title":"Interview Question","detail":null,"children":[{"id":73,"title":"Q","detail":"What does Standard Deviation represent?","children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":74,"title":"A","detail":"It measures how far observations are spread from the mean.","children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"}],"collapsed":true,"depth":1,"color":"c6"},{"id":75,"title":"Empirical Rule (68-95-99.7 Rule)","detail":null,"children":[{"id":76,"title":"Also Called","detail":null,"children":[{"id":77,"title":"Three Sigma Rule","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":78,"title":"±1σ","detail":null,"children":[{"id":79,"title":"68% of data","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":80,"title":"Mean-σ to Mean+σ","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":81,"title":"Left =34%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":82,"title":"Right=34%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":83,"title":"±2σ","detail":null,"children":[{"id":84,"title":"95% of data","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":85,"title":"Remaining outside=5%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":86,"title":"2.5% Left Tail","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":87,"title":"2.5% Right Tail","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":88,"title":"±3σ","detail":null,"children":[{"id":89,"title":"99.7% of data","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":90,"title":"Outside=0.3%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":91,"title":"0.15% Left","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":92,"title":"0.15% Right","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":93,"title":"Interview Question","detail":null,"children":[{"id":94,"title":"Q","detail":"Explain the 68-95-99.7 Rule.","children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":95,"title":"A:","detail":null,"children":[{"id":96,"title":"68% data lies within ±1σ.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":97,"title":"95% data lies within ±2σ.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":98,"title":"99.7% data lies within ±3σ.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"}],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":true,"depth":1,"color":"c1"},{"id":99,"title":"Outliers","detail":null,"children":[{"id":100,"title":"Usually beyond ±3σ","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":101,"title":"Rare Observations","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":102,"title":"Need Investigation","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":103,"title":"Interview Question","detail":null,"children":[{"id":104,"title":"Q","detail":"Where are outliers located in a Normal Distribution?","children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":105,"title":"A","detail":"Usually outside ±3 Standard Deviations.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"}],"collapsed":true,"depth":1,"color":"c2"},{"id":106,"title":"Real World Examples","detail":null,"children":[{"id":107,"title":"Human Height","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":108,"title":"Human Weight","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":109,"title":"IQ Scores","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":110,"title":"Blood Pressure","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":111,"title":"Iris Dataset Features","detail":null,"children":[{"id":112,"title":"Sepal Length","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":113,"title":"Sepal Width","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":114,"title":"Petal Length","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":115,"title":"Petal Width","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":116,"title":"Manufacturing Measurements","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":117,"title":"Exam Scores","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":118,"title":"Mouse Click Positions","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":119,"title":"Product Sizes","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":120,"title":"Interview Question","detail":null,"children":[{"id":121,"title":"Q","detail":"Give examples of Normal Distribution.","children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":122,"title":"A:","detail":null,"children":[{"id":123,"title":"Height","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"},{"id":124,"title":"Weight","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"},{"id":125,"title":"IQ","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"},{"id":126,"title":"Blood Pressure","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"},{"id":127,"title":"Iris Dataset Features","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"}],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"}],"collapsed":true,"depth":1,"color":"c3"},{"id":128,"title":"Why Normal Distribution is Important","detail":null,"children":[{"id":129,"title":"Feature Engineering","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":130,"title":"Statistical Analysis","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":131,"title":"Confidence Interval","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":132,"title":"Hypothesis Testing","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":133,"title":"Z-Score","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":134,"title":"Machine Learning Assumptions","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":135,"title":"Probability Calculations","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":136,"title":"Interview Question","detail":null,"children":[{"id":137,"title":"Q","detail":"Why is Normal Distribution important in Data Science?","children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":138,"title":"A:","detail":null,"children":[{"id":139,"title":"Many ML algorithms assume normality.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":140,"title":"Used in statistical inference.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":141,"title":"Enables probability calculations.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":142,"title":"Helps detect anomalies.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"}],"collapsed":true,"depth":1,"color":"c4"},{"id":143,"title":"Gaussian vs Normal Distribution","detail":null,"children":[{"id":144,"title":"Same Meaning","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":145,"title":"Different Names","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":146,"title":"Interview Question","detail":null,"children":[{"id":147,"title":"Q","detail":"Difference between Gaussian and Normal Distribution?","children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":148,"title":"A","detail":"There is no difference. Gaussian Distribution and Normal Distribution are the same.","children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"}],"collapsed":true,"depth":1,"color":"c5"},{"id":149,"title":"Histogram vs Normal Distribution","detail":null,"children":[{"id":150,"title":"Histogram","detail":null,"children":[{"id":151,"title":"Frequency Bars","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":152,"title":"Raw Data Visualization","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":153,"title":"Normal Distribution","detail":null,"children":[{"id":154,"title":"Smooth Curve","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":155,"title":"Probability Density Function","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":156,"title":"Continuous Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":157,"title":"Interview Question","detail":null,"children":[{"id":158,"title":"Q","detail":"Difference between Histogram and Normal Distribution?","children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":159,"title":"A:","detail":null,"children":[{"id":160,"title":"Histogram shows frequencies.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":161,"title":"Normal Distribution is a smooth probability curve.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"}],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"}],"collapsed":true,"depth":1,"color":"c6"},{"id":162,"title":"Interview Summary","detail":null,"children":[{"id":163,"title":"Q","detail":"What is Normal Distribution?","children":[{"id":164,"title":"A","detail":"A symmetric bell-shaped probability distribution.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":165,"title":"Q","detail":"Why is it called Bell Curve?","children":[{"id":166,"title":"A","detail":"Because its graph resembles a bell.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":167,"title":"Q","detail":"What is Empirical Rule?","children":[{"id":168,"title":"A","detail":"68%, 95% and 99.7% of observations lie within 1σ, 2σ and 3σ respectively.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":169,"title":"Q","detail":"What controls the shape?","children":[{"id":170,"title":"A:","detail":null,"children":[{"id":171,"title":"Mean (location)","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":172,"title":"Standard Deviation (spread)","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"}],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":173,"title":"Q","detail":"What is σ?","children":[{"id":174,"title":"A","detail":"Standard deviation representing variability.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":175,"title":"Q","detail":"What is μ?","children":[{"id":176,"title":"A","detail":"Mean of the distribution.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":177,"title":"Q","detail":"What happens when σ increases?","children":[{"id":178,"title":"A","detail":"Curve becomes wider and flatter.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":179,"title":"Q","detail":"What happens when σ decreases?","children":[{"id":180,"title":"A","detail":"Curve becomes narrower and taller.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":181,"title":"Q","detail":"Can skewed data follow Normal Distribution?","children":[{"id":182,"title":"A","detail":"No. Normal Distribution must be symmetric.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":183,"title":"Q","detail":"Which datasets commonly follow Normal Distribution?","children":[{"id":184,"title":"A:","detail":null,"children":[{"id":185,"title":"Human Height","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":186,"title":"Human Weight","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":187,"title":"IQ Scores","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":188,"title":"Blood Pressure","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":189,"title":"Many biological measurements","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"}],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":true,"depth":1,"color":"c1"}],"collapsed":false,"depth":0,"color":null};
+        let zoom = 1;
+
+        const elTreeInner = document.getElementById('tree-inner');
+        const elTreeScaled = document.getElementById('tree-scaled');
+        const elZoomLabel = document.getElementById('zoom-label');
+
+        function buildNodeWrapper(node, orderIndex) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+
+            const self = document.createElement('div');
+            self.className = 'node-self' + (node.depth === 0 ? ' is-root' : '');
+            self.dataset.id = node.id;
+            if (node.color) self.style.setProperty('--c', `var(--${node.color})`);
+            self.style.setProperty('--delay', (Math.min(orderIndex, 14) * 0.035) + 's');
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'n-title';
+            titleEl.textContent = node.title;
+            self.appendChild(titleEl);
+
+            if (node.detail) {
+                const detailEl = document.createElement('div');
+                detailEl.className = 'n-detail';
+                detailEl.textContent = node.detail;
+                self.appendChild(detailEl);
+            }
+
+            if (node.children.length > 0) {
+                const toggle = document.createElement('div');
+                toggle.className = 'toggle';
+                toggle.textContent = node.collapsed ? '+' : '−';
+                toggle.title = node.collapsed ? 'Expand' : 'Collapse';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    node.collapsed = !node.collapsed;
+                    render();
+                });
+                self.appendChild(toggle);
+            }
+
+            wrapper.appendChild(self);
+
+            if (node.children.length > 0 && !node.collapsed) {
+                const childrenBox = document.createElement('div');
+                childrenBox.className = 'node-children';
+                node.children.forEach((child, i) => {
+                    childrenBox.appendChild(buildNodeWrapper(child, orderIndex + i + 1));
+                });
+                wrapper.appendChild(childrenBox);
+            }
+
+            return wrapper;
+        }
+
+        function drawConnectors() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'connectors');
+            svg.setAttribute('width', elTreeInner.scrollWidth);
+            svg.setAttribute('height', elTreeInner.scrollHeight);
+
+            function walk(node) {
+                if (node.children.length === 0 || node.collapsed) return;
+                const parentEl = elTreeInner.querySelector(`.node-self[data-id="${node.id}"]`);
+                if (!parentEl) return;
+                const px = parentEl.offsetLeft + parentEl.offsetWidth;
+                const py = parentEl.offsetTop + parentEl.offsetHeight / 2;
+
+                node.children.forEach(child => {
+                    const childEl = elTreeInner.querySelector(`.node-self[data-id="${child.id}"]`);
+                    if (!childEl) return;
+                    const cx = childEl.offsetLeft;
+                    const cy = childEl.offsetTop + childEl.offsetHeight / 2;
+                    const midX = px + (cx - px) * 0.5;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${px},${py} C ${midX},${py} ${midX},${cy} ${cx},${cy}`);
+                    path.setAttribute('stroke', `var(--${child.color || 'root'})`);
+                    path.setAttribute('opacity', '0.75');
+                    svg.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('fill', `var(--${child.color || 'root'})`);
+                    svg.appendChild(dot);
+
+                    walk(child);
+                });
+            }
+            walk(treeData);
+            elTreeInner.appendChild(svg);
+        }
+
+        function updateScaledSize() {
+            const w = elTreeInner.scrollWidth;
+            const h = elTreeInner.scrollHeight;
+            elTreeScaled.style.transform = `scale(${zoom})`;
+            elTreeScaled.style.width = (w * zoom + 140) + 'px';
+            elTreeScaled.style.height = (h * zoom + 100) + 'px';
+            elZoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function render() {
+            if (!treeData) return;
+            elTreeInner.innerHTML = '';
+            elTreeInner.style.position = 'relative';
+            elTreeInner.appendChild(buildNodeWrapper(treeData, 0));
+            requestAnimationFrame(() => {
+                drawConnectors();
+                updateScaledSize();
+            });
+        }
+
+        function setAllCollapsed(node, value, isRoot = true) {
+            if (!isRoot) node.collapsed = value;
+            node.children.forEach(c => setAllCollapsed(c, value, false));
+        }
+
+        document.getElementById('btn-expand').addEventListener('click', () => { setAllCollapsed(treeData, false); render(); });
+        document.getElementById('btn-collapse').addEventListener('click', () => { setAllCollapsed(treeData, true); render(); });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1.8, +(zoom + 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.4, +(zoom - 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => { zoom = 1; updateScaledSize(); });
+
+        render();
+    </script>
+</body>
+</html>
