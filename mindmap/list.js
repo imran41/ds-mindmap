@@ -5,5 +5,6 @@ window.mindmapFiles = [
   "data_science_interview_questions_data_preprocessing.html",
   "population_sample_sampling_techniques.html",
   "rag_retrieval_augmented_generation.html",
-  "percentile_quartiles.html"
+  "percentile_quartiles.html",
+  "normal_distribution_gaussian_distribution_.html"
 ];
