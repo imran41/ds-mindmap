@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Limit Theorem (CLT) - Mind Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --bg-grid: rgba(255, 255, 255, 0.035);
+            --panel: #101a2e;
+            --panel-border: #1d2c47;
+            --ink: #E6EDF7;
+            --muted: #8694ab;
+            --root: #67E8F9;
+            --c1: #F2B84B;
+            --c2: #2DD4BF;
+            --c3: #FB7472;
+            --c4: #9B8CFF;
+            --c5: #4EA8DE;
+            --c6: #A3E635;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse 70% 50% at 18% 12%, rgba(103, 232, 249, 0.06), transparent 60%);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.65));
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        button {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 7px;
+            border: 1px solid var(--panel-border);
+            background: #15213a;
+            color: var(--ink);
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--root);
+            background: #192742;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            align-self: center;
+            margin-left: 4px;
+            min-width: 42px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        #tree-scaled {
+            transform-origin: top left;
+            padding: 50px 70px 100px;
+        }
+
+        #tree-inner {
+            position: relative;
+            display: inline-block;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .node-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+            margin-left: 78px;
+        }
+
+        .node-self {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            border: 1.5px solid var(--c, var(--root));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+            box-shadow:
+                0 4px 16px -8px rgba(0, 0, 0, 0.7),
+                0 0 16px -6px var(--c, var(--root));
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0;
+            animation: pop-in .42s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .node-self.is-root {
+            padding: 14px 22px;
+            border-width: 2px;
+            font-size: 15.5px;
+        }
+
+        .n-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .node-self.is-root .n-title {
+            font-size: 15.5px;
+            color: var(--root);
+        }
+
+        .n-detail {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .toggle {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #0b1220;
+            border: 1.5px solid var(--c, var(--root));
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .toggle:hover {
+            box-shadow: 0 0 10px -2px var(--c, var(--root));
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.connectors path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        svg.connectors circle {
+            r: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrap" id="canvas-wrap">
+        <div class="toolbar">
+            <button id="zoom-out">−</button>
+            <span class="zoom-label" id="zoom-label">100%</span>
+            <button id="zoom-in">+</button>
+            <button id="zoom-reset">Reset</button>
+            <div class="spacer"></div>
+            <button id="btn-expand">Expand All</button>
+            <button id="btn-collapse" style="margin-right: 8px;">Collapse All</button>
+        </div>
+        <div id="tree-scaled">
+            <div id="tree-inner"></div>
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 28px; background: rgba(11, 18, 32, 0.85); backdrop-filter: blur(4px); border-top: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; z-index: 10;">
+        Created by <b>Bihar Digital Data & Network</b> (<a href="https://bddn.in" target="_blank" style="color: var(--root); text-decoration: none;">bddn.in</a>)
+    </footer>
+
+    <script>
+        const treeData = {"id":0,"title":"Central Limit Theorem (CLT)","detail":null,"children":[{"id":1,"title":"Introduction","detail":null,"children":[{"id":2,"title":"Definition","detail":null,"children":[{"id":3,"title":"States that the sampling distribution of sample means approaches a Normal Distribution, regardless of the population distribution, provided the sample size is sufficiently large.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":4,"title":"Importance","detail":null,"children":[{"id":5,"title":"Foundation of Inferential Statistics","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":6,"title":"Used in Hypothesis Testing","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":7,"title":"Confidence Intervals","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":8,"title":"Machine Learning","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":9,"title":"Data Science","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":10,"title":"Statistical Modeling","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":11,"title":"Interview Question","detail":null,"children":[{"id":12,"title":"Q","detail":"What is Central Limit Theorem?","children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":13,"title":"A","detail":"The distribution of sample means becomes approximately Normal when sample size is large (typically n ≥ 30), irrespective of the population distribution.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"},{"id":14,"title":"Population Distribution","detail":null,"children":[{"id":15,"title":"Definition","detail":null,"children":[{"id":16,"title":"Entire dataset or complete collection of observations.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":17,"title":"Can Follow","detail":null,"children":[{"id":18,"title":"Normal Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":19,"title":"Log-Normal Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":20,"title":"Uniform Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":21,"title":"Skewed Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":22,"title":"Any Other Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":23,"title":"Key Point","detail":null,"children":[{"id":24,"title":"CLT works regardless of the original population distribution.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":25,"title":"Interview Question","detail":null,"children":[{"id":26,"title":"Q","detail":"Does CLT require population to be Normal?","children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":27,"title":"A","detail":"No. The original population can have any distribution.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"}],"collapsed":true,"depth":1,"color":"c2"},{"id":28,"title":"Sample","detail":null,"children":[{"id":29,"title":"Random subset of Population","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":30,"title":"Sample Size (n)","detail":null,"children":[{"id":31,"title":"Recommended n ≥ 30","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":32,"title":"Larger sample gives better approximation.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":33,"title":"Multiple Samples","detail":null,"children":[{"id":34,"title":"Sample 1","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":35,"title":"Sample 2","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":36,"title":"Sample 3","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":37,"title":"...","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":38,"title":"Interview Question","detail":null,"children":[{"id":39,"title":"Q","detail":"Why should sample size be at least 30?","children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":40,"title":"A","detail":"A larger sample size makes the sampling distribution closer to Normal.","children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"}],"collapsed":true,"depth":1,"color":"c3"},{"id":41,"title":"Sample Mean","detail":null,"children":[{"id":42,"title":"Calculate Mean of Each Sample","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":43,"title":"Examples","detail":null,"children":[{"id":44,"title":"X̄₁","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":45,"title":"X̄₂","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":46,"title":"X̄₃","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":47,"title":"...","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"},{"id":48,"title":"Every sample has its own mean.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":49,"title":"Interview Question","detail":null,"children":[{"id":50,"title":"Q","detail":"What is Sample Mean?","children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":51,"title":"A","detail":"It is the average value of observations in one sample.","children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"}],"collapsed":true,"depth":1,"color":"c4"},{"id":52,"title":"Sampling Distribution","detail":null,"children":[{"id":53,"title":"Definition","detail":null,"children":[{"id":54,"title":"Distribution formed by plotting all sample means.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":55,"title":"Created From","detail":null,"children":[{"id":56,"title":"Sample Mean 1","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":57,"title":"Sample Mean 2","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":58,"title":"Sample Mean 3","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":59,"title":"Many More Sample Means","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":60,"title":"Result","detail":null,"children":[{"id":61,"title":"Approximately Normal Distribution","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":62,"title":"Also Called","detail":null,"children":[{"id":63,"title":"Distribution of Sample Means","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":64,"title":"Interview Question","detail":null,"children":[{"id":65,"title":"Q","detail":"What is Sampling Distribution?","children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":66,"title":"A","detail":"It is the probability distribution of a statistic (usually sample means) obtained from many samples.","children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"}],"collapsed":true,"depth":1,"color":"c5"},{"id":67,"title":"Working of CLT","detail":null,"children":[{"id":68,"title":"Step 1","detail":null,"children":[{"id":69,"title":"Start with any Population Distribution.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":70,"title":"Step 2","detail":null,"children":[{"id":71,"title":"Draw many random samples.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":72,"title":"Step 3","detail":null,"children":[{"id":73,"title":"Keep sample size ≥ 30.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":74,"title":"Step 4","detail":null,"children":[{"id":75,"title":"Compute mean of every sample.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":76,"title":"Step 5","detail":null,"children":[{"id":77,"title":"Plot all sample means.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":78,"title":"Final Result","detail":null,"children":[{"id":79,"title":"Sampling distribution becomes Normal.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":80,"title":"Interview Question","detail":null,"children":[{"id":81,"title":"Q","detail":"Explain CLT step by step.","children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":82,"title":"A:","detail":null,"children":[{"id":83,"title":"Draw many random samples.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":84,"title":"Calculate each sample mean.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":85,"title":"Plot sample means.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":86,"title":"Distribution becomes Normal.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"}],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"}],"collapsed":true,"depth":1,"color":"c6"},{"id":87,"title":"Mathematical Representation","detail":null,"children":[{"id":88,"title":"Population Mean = μ","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":89,"title":"Population Standard Deviation = σ","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":90,"title":"Sample Mean = X̄","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":91,"title":"Mean of Sampling Distribution = μ","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":92,"title":"Standard Error","detail":null,"children":[{"id":93,"title":"σ / √n","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":94,"title":"Interview Question","detail":null,"children":[{"id":95,"title":"Q","detail":"What is the standard deviation of the sampling distribution?","children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":96,"title":"A","detail":"Standard Error = σ / √n.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":true,"depth":1,"color":"c1"},{"id":97,"title":"Important Properties","detail":null,"children":[{"id":98,"title":"Population may be Normal or Non-Normal.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":99,"title":"Sampling Distribution tends to Normal.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":100,"title":"Larger Sample Size → Better Normal Approximation.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":101,"title":"Mean of Sample Means = Population Mean.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":102,"title":"Standard Error decreases as sample size increases.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":103,"title":"Independent Random Samples are required.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":104,"title":"Interview Question","detail":null,"children":[{"id":105,"title":"Q","detail":"What are the assumptions of CLT?","children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":106,"title":"A:","detail":null,"children":[{"id":107,"title":"Random sampling","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":108,"title":"Independent observations","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":109,"title":"Large sample size","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":110,"title":"Repeated sampling","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"}],"collapsed":true,"depth":1,"color":"c2"},{"id":111,"title":"Standard Error","detail":null,"children":[{"id":112,"title":"Formula","detail":null,"children":[{"id":113,"title":"σ / √n","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":114,"title":"Interpretation","detail":null,"children":[{"id":115,"title":"Measures variability of sample means.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":116,"title":"Different from Standard Deviation.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":117,"title":"Decreases as sample size increases.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":118,"title":"Interview Question","detail":null,"children":[{"id":119,"title":"Q","detail":"Difference between Standard Deviation and Standard Error?","children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":120,"title":"A:","detail":null,"children":[{"id":121,"title":"Standard Deviation measures spread of data.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"},{"id":122,"title":"Standard Error measures spread of sample means.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"}],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"}],"collapsed":true,"depth":1,"color":"c3"},{"id":123,"title":"Real Life Examples","detail":null,"children":[{"id":124,"title":"Average Height of Students","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":125,"title":"Average Weight of Population","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":126,"title":"Election Exit Polls","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":127,"title":"Customer Satisfaction Surveys","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":128,"title":"Product Quality Inspection","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":129,"title":"Medical Clinical Trials","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":130,"title":"Manufacturing Process","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":131,"title":"Banking Analytics","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":132,"title":"Interview Question","detail":null,"children":[{"id":133,"title":"Q","detail":"Give real-world applications of CLT.","children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":134,"title":"A:","detail":null,"children":[{"id":135,"title":"Opinion Polls","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":136,"title":"Quality Control","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":137,"title":"Healthcare Studies","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":138,"title":"Financial Analysis","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":139,"title":"Data Science","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"}],"collapsed":true,"depth":1,"color":"c4"},{"id":140,"title":"Why CLT is Important","detail":null,"children":[{"id":141,"title":"Makes Statistical Inference Possible","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":142,"title":"Enables Confidence Intervals","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":143,"title":"Supports Hypothesis Testing","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":144,"title":"Used in Machine Learning Evaluation","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":145,"title":"Helps Estimate Population Parameters","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":146,"title":"Works even for Non-Normal Data","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c5"},{"id":147,"title":"Interview Question","detail":null,"children":[{"id":148,"title":"Q","detail":"Why is CLT important?","children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":149,"title":"A:","detail":null,"children":[{"id":150,"title":"Converts sample means into Normal Distribution.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":151,"title":"Enables use of statistical tests.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":152,"title":"Simplifies probability calculations.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":153,"title":"Forms the basis of inferential statistics.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"}],"collapsed":true,"depth":1,"color":"c5"},{"id":154,"title":"Common Interview Confusions","detail":null,"children":[{"id":155,"title":"Population Distribution ≠ Sampling Distribution","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":156,"title":"CLT does NOT say Population becomes Normal.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":157,"title":"Only Sample Means become Normally Distributed.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":158,"title":"Sample Size matters.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":159,"title":"Standard Error ≠ Standard Deviation.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":160,"title":"Interview Question","detail":null,"children":[{"id":161,"title":"Q","detail":"Does CLT make the original data Normal?","children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":162,"title":"A","detail":"No. Only the distribution of sample means becomes approximately Normal.","children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"}],"collapsed":true,"depth":1,"color":"c6"},{"id":163,"title":"CLT vs Normal Distribution","detail":null,"children":[{"id":164,"title":"Normal Distribution","detail":null,"children":[{"id":165,"title":"Describes original data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":166,"title":"Population itself is Normal.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":167,"title":"Central Limit Theorem","detail":null,"children":[{"id":168,"title":"Describes sample means.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":169,"title":"Works even if population isn't Normal.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":170,"title":"Sampling distribution becomes Normal.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":171,"title":"Interview Question","detail":null,"children":[{"id":172,"title":"Q","detail":"Difference between Normal Distribution and CLT?","children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":173,"title":"A:","detail":null,"children":[{"id":174,"title":"Normal Distribution describes population data.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":175,"title":"CLT describes distribution of sample means.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"}],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":true,"depth":1,"color":"c1"},{"id":176,"title":"Interview Summary","detail":null,"children":[{"id":177,"title":"Q","detail":"What is Central Limit Theorem?","children":[{"id":178,"title":"A","detail":"Distribution of sample means becomes Normal for sufficiently large samples.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":179,"title":"Q","detail":"Minimum sample size?","children":[{"id":180,"title":"A","detail":"Common rule is n ≥ 30.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":181,"title":"Q","detail":"Does CLT require Normal population?","children":[{"id":182,"title":"A","detail":"No.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":183,"title":"Q","detail":"What becomes Normally Distributed?","children":[{"id":184,"title":"A","detail":"Sample Means (Sampling Distribution).","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":185,"title":"Q","detail":"Mean of Sampling Distribution?","children":[{"id":186,"title":"A","detail":"Equal to Population Mean (μ).","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":187,"title":"Q","detail":"Standard Error Formula?","children":[{"id":188,"title":"A","detail":"σ / √n.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":189,"title":"Q","detail":"Why is CLT useful?","children":[{"id":190,"title":"A:","detail":null,"children":[{"id":191,"title":"Statistical Inference","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":192,"title":"Confidence Intervals","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":193,"title":"Hypothesis Testing","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":194,"title":"Machine Learning","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":195,"title":"Data Science","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":196,"title":"Q","detail":"What is the biggest takeaway from CLT?","children":[{"id":197,"title":"A","detail":"No matter how the population is distributed, the sampling distribution of the mean approaches a Normal Distribution when the sample size is sufficiently large.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"}],"collapsed":true,"depth":1,"color":"c2"}],"collapsed":false,"depth":0,"color":null};
+        let zoom = 1;
+
+        const elTreeInner = document.getElementById('tree-inner');
+        const elTreeScaled = document.getElementById('tree-scaled');
+        const elZoomLabel = document.getElementById('zoom-label');
+
+        function buildNodeWrapper(node, orderIndex) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+
+            const self = document.createElement('div');
+            self.className = 'node-self' + (node.depth === 0 ? ' is-root' : '');
+            self.dataset.id = node.id;
+            if (node.color) self.style.setProperty('--c', `var(--${node.color})`);
+            self.style.setProperty('--delay', (Math.min(orderIndex, 14) * 0.035) + 's');
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'n-title';
+            titleEl.textContent = node.title;
+            self.appendChild(titleEl);
+
+            if (node.detail) {
+                const detailEl = document.createElement('div');
+                detailEl.className = 'n-detail';
+                detailEl.textContent = node.detail;
+                self.appendChild(detailEl);
+            }
+
+            if (node.children.length > 0) {
+                const toggle = document.createElement('div');
+                toggle.className = 'toggle';
+                toggle.textContent = node.collapsed ? '+' : '−';
+                toggle.title = node.collapsed ? 'Expand' : 'Collapse';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    node.collapsed = !node.collapsed;
+                    render();
+                });
+                self.appendChild(toggle);
+            }
+
+            wrapper.appendChild(self);
+
+            if (node.children.length > 0 && !node.collapsed) {
+                const childrenBox = document.createElement('div');
+                childrenBox.className = 'node-children';
+                node.children.forEach((child, i) => {
+                    childrenBox.appendChild(buildNodeWrapper(child, orderIndex + i + 1));
+                });
+                wrapper.appendChild(childrenBox);
+            }
+
+            return wrapper;
+        }
+
+        function drawConnectors() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'connectors');
+            svg.setAttribute('width', elTreeInner.scrollWidth);
+            svg.setAttribute('height', elTreeInner.scrollHeight);
+
+            function walk(node) {
+                if (node.children.length === 0 || node.collapsed) return;
+                const parentEl = elTreeInner.querySelector(`.node-self[data-id="${node.id}"]`);
+                if (!parentEl) return;
+                const px = parentEl.offsetLeft + parentEl.offsetWidth;
+                const py = parentEl.offsetTop + parentEl.offsetHeight / 2;
+
+                node.children.forEach(child => {
+                    const childEl = elTreeInner.querySelector(`.node-self[data-id="${child.id}"]`);
+                    if (!childEl) return;
+                    const cx = childEl.offsetLeft;
+                    const cy = childEl.offsetTop + childEl.offsetHeight / 2;
+                    const midX = px + (cx - px) * 0.5;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${px},${py} C ${midX},${py} ${midX},${cy} ${cx},${cy}`);
+                    path.setAttribute('stroke', `var(--${child.color || 'root'})`);
+                    path.setAttribute('opacity', '0.75');
+                    svg.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('fill', `var(--${child.color || 'root'})`);
+                    svg.appendChild(dot);
+
+                    walk(child);
+                });
+            }
+            walk(treeData);
+            elTreeInner.appendChild(svg);
+        }
+
+        function updateScaledSize() {
+            const w = elTreeInner.scrollWidth;
+            const h = elTreeInner.scrollHeight;
+            elTreeScaled.style.transform = `scale(${zoom})`;
+            elTreeScaled.style.width = (w * zoom + 140) + 'px';
+            elTreeScaled.style.height = (h * zoom + 100) + 'px';
+            elZoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function render() {
+            if (!treeData) return;
+            elTreeInner.innerHTML = '';
+            elTreeInner.style.position = 'relative';
+            elTreeInner.appendChild(buildNodeWrapper(treeData, 0));
+            requestAnimationFrame(() => {
+                drawConnectors();
+                updateScaledSize();
+            });
+        }
+
+        function setAllCollapsed(node, value, isRoot = true) {
+            if (!isRoot) node.collapsed = value;
+            node.children.forEach(c => setAllCollapsed(c, value, false));
+        }
+
+        document.getElementById('btn-expand').addEventListener('click', () => { setAllCollapsed(treeData, false); render(); });
+        document.getElementById('btn-collapse').addEventListener('click', () => { setAllCollapsed(treeData, true); render(); });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1.8, +(zoom + 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.4, +(zoom - 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => { zoom = 1; updateScaledSize(); });
+
+        render();
+    </script>
+</body>
+</html>
