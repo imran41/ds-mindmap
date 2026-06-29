@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Preprocessing - Mind Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --bg-grid: rgba(255, 255, 255, 0.035);
+            --panel: #101a2e;
+            --panel-border: #1d2c47;
+            --ink: #E6EDF7;
+            --muted: #8694ab;
+            --root: #67E8F9;
+            --c1: #F2B84B;
+            --c2: #2DD4BF;
+            --c3: #FB7472;
+            --c4: #9B8CFF;
+            --c5: #4EA8DE;
+            --c6: #A3E635;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse 70% 50% at 18% 12%, rgba(103, 232, 249, 0.06), transparent 60%);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.65));
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        button {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 7px;
+            border: 1px solid var(--panel-border);
+            background: #15213a;
+            color: var(--ink);
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--root);
+            background: #192742;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            align-self: center;
+            margin-left: 4px;
+            min-width: 42px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        #tree-scaled {
+            transform-origin: top left;
+            padding: 50px 70px 100px;
+        }
+
+        #tree-inner {
+            position: relative;
+            display: inline-block;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .node-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+            margin-left: 78px;
+        }
+
+        .node-self {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            border: 1.5px solid var(--c, var(--root));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+            box-shadow:
+                0 4px 16px -8px rgba(0, 0, 0, 0.7),
+                0 0 16px -6px var(--c, var(--root));
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0;
+            animation: pop-in .42s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .node-self.is-root {
+            padding: 14px 22px;
+            border-width: 2px;
+            font-size: 15.5px;
+        }
+
+        .n-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .node-self.is-root .n-title {
+            font-size: 15.5px;
+            color: var(--root);
+        }
+
+        .n-detail {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .toggle {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #0b1220;
+            border: 1.5px solid var(--c, var(--root));
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .toggle:hover {
+            box-shadow: 0 0 10px -2px var(--c, var(--root));
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.connectors path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        svg.connectors circle {
+            r: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrap" id="canvas-wrap">
+        <div class="toolbar">
+            <button id="zoom-out">−</button>
+            <span class="zoom-label" id="zoom-label">100%</span>
+            <button id="zoom-in">+</button>
+            <button id="zoom-reset">Reset</button>
+            <div class="spacer"></div>
+            <button id="btn-expand">Expand All</button>
+            <button id="btn-collapse" style="margin-right: 8px;">Collapse All</button>
+        </div>
+        <div id="tree-scaled">
+            <div id="tree-inner"></div>
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 28px; background: rgba(11, 18, 32, 0.85); backdrop-filter: blur(4px); border-top: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; z-index: 10;">
+        Created by <b>Bihar Digital Data & Network</b> (<a href="https://bddn.in" target="_blank" style="color: var(--root); text-decoration: none;">bddn.in</a>)
+    </footer>
+
+    <script>
+        const treeData = {"id":0,"title":"Data Preprocessing","detail":null,"children":[{"id":1,"title":"Overview","detail":null,"children":[{"id":2,"title":"Purpose","detail":null,"children":[{"id":3,"title":"Prepare raw data before Machine Learning.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":4,"title":"Importance","detail":null,"children":[{"id":5,"title":"Improves model accuracy.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":6,"title":"Removes inconsistencies.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":7,"title":"Handles categorical data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":8,"title":"Makes data suitable for algorithms.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"},{"id":9,"title":"Binning","detail":null,"children":[{"id":10,"title":"Definition","detail":null,"children":[{"id":11,"title":"Divide continuous values into discrete intervals (bins).","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":12,"title":"Why use Binning?","detail":null,"children":[{"id":13,"title":"Reduce data variation.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":14,"title":"Easier interpretation.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":15,"title":"Simplify analysis.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":16,"title":"Convert regression problem into classification (when required).","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":17,"title":"Example","detail":null,"children":[{"id":18,"title":"Fuel Efficiency","detail":null,"children":[{"id":19,"title":"5–15 km/l → Low","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":20,"title":"15–30 km/l → Medium","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":21,"title":"30–50 km/l → High","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":22,"title":"Types","detail":null,"children":[{"id":23,"title":"Equal Width","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":24,"title":"Equal Frequency","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":25,"title":"Custom Business Bins","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":26,"title":"Python","detail":null,"children":[{"id":27,"title":"pandas.cut()","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":28,"title":"Advantages","detail":null,"children":[{"id":29,"title":"Easy interpretation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":30,"title":"Reduces noise","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":31,"title":"Business-friendly categories","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":32,"title":"Interview Question","detail":null,"children":[{"id":33,"title":"What is Binning?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":34,"title":"Why is Binning required?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"}],"collapsed":false,"depth":1,"color":"c2"},{"id":35,"title":"Encoding","detail":null,"children":[{"id":36,"title":"Definition","detail":null,"children":[{"id":37,"title":"Convert categorical values into numerical values.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":38,"title":"Why Encoding?","detail":null,"children":[{"id":39,"title":"ML algorithms require numeric input.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":40,"title":"Mathematical models cannot process strings.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":41,"title":"Types","detail":null,"children":[{"id":42,"title":"Label Encoding","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":43,"title":"One-Hot Encoding","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":44,"title":"Example","detail":null,"children":[{"id":45,"title":"Education","detail":null,"children":[{"id":46,"title":"Diploma","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"},{"id":47,"title":"Graduation","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"},{"id":48,"title":"Post Graduation","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"}],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":49,"title":"When to use?","detail":null,"children":[{"id":50,"title":"Decision Tree","detail":null,"children":[{"id":51,"title":"Handles categorical values.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"}],"collapsed":false,"depth":3,"color":"c3"},{"id":52,"title":"Logistic Regression","detail":null,"children":[{"id":53,"title":"Requires numeric encoding.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c3"}],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":54,"title":"Interview Question","detail":null,"children":[{"id":55,"title":"Why Encoding?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":56,"title":"Label vs One-Hot Encoding","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":57,"title":"Which algorithm requires encoding?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"}],"collapsed":false,"depth":1,"color":"c3"},{"id":58,"title":"Data Transformation","detail":null,"children":[{"id":59,"title":"Definition","detail":null,"children":[{"id":60,"title":"Transform data into a suitable distribution.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":61,"title":"Why?","detail":null,"children":[{"id":62,"title":"Handle skewed data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":63,"title":"Improve model performance.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":64,"title":"Meet statistical assumptions.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":65,"title":"Techniques","detail":null,"children":[{"id":66,"title":"Log Transformation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":67,"title":"Box-Cox Transformation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":68,"title":"Square Root","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":69,"title":"Cube Root","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":70,"title":"Exponential Transformation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":71,"title":"Example","detail":null,"children":[{"id":72,"title":"Income follows exponential distribution.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":73,"title":"Normal Distribution","detail":null,"children":[{"id":74,"title":"Many statistical methods assume normality.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":75,"title":"Easier statistical analysis.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":76,"title":"Better regression performance.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":77,"title":"Interview Question","detail":null,"children":[{"id":78,"title":"Why Transformation?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":79,"title":"Why Log Transformation?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":80,"title":"What is Box-Cox?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":81,"title":"When should we transform data?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"}],"collapsed":false,"depth":1,"color":"c4"},{"id":82,"title":"Exploratory Data Analysis (EDA)","detail":null,"children":[{"id":83,"title":"Goal","detail":null,"children":[{"id":84,"title":"Understand data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":85,"title":"Find patterns.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":86,"title":"Detect outliers.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":87,"title":"Detect skewness.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":88,"title":"Understand distributions.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":89,"title":"Tasks","detail":null,"children":[{"id":90,"title":"Visualization","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":91,"title":"Statistical Summary","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":92,"title":"Correlation Analysis","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":93,"title":"Missing Values","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":94,"title":"Interview Question","detail":null,"children":[{"id":95,"title":"What is EDA?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":96,"title":"Why is EDA important?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"}],"collapsed":false,"depth":1,"color":"c5"},{"id":97,"title":"Interview Tips","detail":null,"children":[{"id":98,"title":"Explain business reason first.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":99,"title":"Mention algorithm requirement.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":100,"title":"Give a real-world example.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":101,"title":"Mention advantages and limitations.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"},{"id":102,"title":"Explain the impact on model performance.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c6"}],"collapsed":false,"depth":1,"color":"c6"}],"collapsed":false,"depth":0,"color":null};
+        let zoom = 1;
+
+        const elTreeInner = document.getElementById('tree-inner');
+        const elTreeScaled = document.getElementById('tree-scaled');
+        const elZoomLabel = document.getElementById('zoom-label');
+
+        function buildNodeWrapper(node, orderIndex) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+
+            const self = document.createElement('div');
+            self.className = 'node-self' + (node.depth === 0 ? ' is-root' : '');
+            self.dataset.id = node.id;
+            if (node.color) self.style.setProperty('--c', `var(--${node.color})`);
+            self.style.setProperty('--delay', (Math.min(orderIndex, 14) * 0.035) + 's');
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'n-title';
+            titleEl.textContent = node.title;
+            self.appendChild(titleEl);
+
+            if (node.detail) {
+                const detailEl = document.createElement('div');
+                detailEl.className = 'n-detail';
+                detailEl.textContent = node.detail;
+                self.appendChild(detailEl);
+            }
+
+            if (node.children.length > 0) {
+                const toggle = document.createElement('div');
+                toggle.className = 'toggle';
+                toggle.textContent = node.collapsed ? '+' : '−';
+                toggle.title = node.collapsed ? 'Expand' : 'Collapse';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    node.collapsed = !node.collapsed;
+                    render();
+                });
+                self.appendChild(toggle);
+            }
+
+            wrapper.appendChild(self);
+
+            if (node.children.length > 0 && !node.collapsed) {
+                const childrenBox = document.createElement('div');
+                childrenBox.className = 'node-children';
+                node.children.forEach((child, i) => {
+                    childrenBox.appendChild(buildNodeWrapper(child, orderIndex + i + 1));
+                });
+                wrapper.appendChild(childrenBox);
+            }
+
+            return wrapper;
+        }
+
+        function drawConnectors() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'connectors');
+            svg.setAttribute('width', elTreeInner.scrollWidth);
+            svg.setAttribute('height', elTreeInner.scrollHeight);
+
+            function walk(node) {
+                if (node.children.length === 0 || node.collapsed) return;
+                const parentEl = elTreeInner.querySelector(`.node-self[data-id="${node.id}"]`);
+                if (!parentEl) return;
+                const px = parentEl.offsetLeft + parentEl.offsetWidth;
+                const py = parentEl.offsetTop + parentEl.offsetHeight / 2;
+
+                node.children.forEach(child => {
+                    const childEl = elTreeInner.querySelector(`.node-self[data-id="${child.id}"]`);
+                    if (!childEl) return;
+                    const cx = childEl.offsetLeft;
+                    const cy = childEl.offsetTop + childEl.offsetHeight / 2;
+                    const midX = px + (cx - px) * 0.5;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${px},${py} C ${midX},${py} ${midX},${cy} ${cx},${cy}`);
+                    path.setAttribute('stroke', `var(--${child.color || 'root'})`);
+                    path.setAttribute('opacity', '0.75');
+                    svg.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('fill', `var(--${child.color || 'root'})`);
+                    svg.appendChild(dot);
+
+                    walk(child);
+                });
+            }
+            walk(treeData);
+            elTreeInner.appendChild(svg);
+        }
+
+        function updateScaledSize() {
+            const w = elTreeInner.scrollWidth;
+            const h = elTreeInner.scrollHeight;
+            elTreeScaled.style.transform = `scale(${zoom})`;
+            elTreeScaled.style.width = (w * zoom + 140) + 'px';
+            elTreeScaled.style.height = (h * zoom + 100) + 'px';
+            elZoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function render() {
+            if (!treeData) return;
+            elTreeInner.innerHTML = '';
+            elTreeInner.style.position = 'relative';
+            elTreeInner.appendChild(buildNodeWrapper(treeData, 0));
+            requestAnimationFrame(() => {
+                drawConnectors();
+                updateScaledSize();
+            });
+        }
+
+        function setAllCollapsed(node, value, isRoot = true) {
+            if (!isRoot) node.collapsed = value;
+            node.children.forEach(c => setAllCollapsed(c, value, false));
+        }
+
+        document.getElementById('btn-expand').addEventListener('click', () => { setAllCollapsed(treeData, false); render(); });
+        document.getElementById('btn-collapse').addEventListener('click', () => { setAllCollapsed(treeData, true); render(); });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1.8, +(zoom + 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.4, +(zoom - 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => { zoom = 1; updateScaledSize(); });
+
+        render();
+    </script>
+</body>
+</html>

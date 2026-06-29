@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Science Interview Questions - Mind Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --bg-grid: rgba(255, 255, 255, 0.035);
+            --panel: #101a2e;
+            --panel-border: #1d2c47;
+            --ink: #E6EDF7;
+            --muted: #8694ab;
+            --root: #67E8F9;
+            --c1: #F2B84B;
+            --c2: #2DD4BF;
+            --c3: #FB7472;
+            --c4: #9B8CFF;
+            --c5: #4EA8DE;
+            --c6: #A3E635;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse 70% 50% at 18% 12%, rgba(103, 232, 249, 0.06), transparent 60%);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.65));
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        button {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 7px;
+            border: 1px solid var(--panel-border);
+            background: #15213a;
+            color: var(--ink);
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--root);
+            background: #192742;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            align-self: center;
+            margin-left: 4px;
+            min-width: 42px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        #tree-scaled {
+            transform-origin: top left;
+            padding: 50px 70px 100px;
+        }
+
+        #tree-inner {
+            position: relative;
+            display: inline-block;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .node-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+            margin-left: 78px;
+        }
+
+        .node-self {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            border: 1.5px solid var(--c, var(--root));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+            box-shadow:
+                0 4px 16px -8px rgba(0, 0, 0, 0.7),
+                0 0 16px -6px var(--c, var(--root));
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0;
+            animation: pop-in .42s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .node-self.is-root {
+            padding: 14px 22px;
+            border-width: 2px;
+            font-size: 15.5px;
+        }
+
+        .n-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .node-self.is-root .n-title {
+            font-size: 15.5px;
+            color: var(--root);
+        }
+
+        .n-detail {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .toggle {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #0b1220;
+            border: 1.5px solid var(--c, var(--root));
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .toggle:hover {
+            box-shadow: 0 0 10px -2px var(--c, var(--root));
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.connectors path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        svg.connectors circle {
+            r: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrap" id="canvas-wrap">
+        <div class="toolbar">
+            <button id="zoom-out">−</button>
+            <span class="zoom-label" id="zoom-label">100%</span>
+            <button id="zoom-in">+</button>
+            <button id="zoom-reset">Reset</button>
+            <div class="spacer"></div>
+            <button id="btn-expand">Expand All</button>
+            <button id="btn-collapse" style="margin-right: 8px;">Collapse All</button>
+        </div>
+        <div id="tree-scaled">
+            <div id="tree-inner"></div>
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 28px; background: rgba(11, 18, 32, 0.85); backdrop-filter: blur(4px); border-top: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; z-index: 10;">
+        Created by <b>Bihar Digital Data & Network</b> (<a href="https://bddn.in" target="_blank" style="color: var(--root); text-decoration: none;">bddn.in</a>)
+    </footer>
+
+    <script>
+        const treeData = {"id":0,"title":"Data Science Interview Questions","detail":null,"children":[{"id":1,"title":"Q1. Why prefer Decision Tree over Random Forest?","detail":null,"children":[{"id":2,"title":"Answer","detail":null,"children":[{"id":3,"title":"Decision Trees are preferred when explainability, faster training, or specific feature usage is more important than maximum accuracy.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":4,"title":"Reason 1","detail":"Explainability","children":[{"id":5,"title":"Single tree is easy to visualize.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":6,"title":"Decision path can be traced.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":7,"title":"Easy to explain to business stakeholders.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":8,"title":"Reason 2","detail":"Low Computational Cost","children":[{"id":9,"title":"Only one tree is trained.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":10,"title":"Faster training.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":11,"title":"Lower memory usage.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":12,"title":"Reason 3","detail":"Important Features","children":[{"id":13,"title":"Uses all important features.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":14,"title":"Random Forest randomly selects features.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":15,"title":"Example","detail":null,"children":[{"id":16,"title":"Banking or healthcare where every prediction must be explained.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"},{"id":17,"title":"Q2. Why is it called Logistic Regression and not Logistic Classification?","detail":null,"children":[{"id":18,"title":"Answer","detail":null,"children":[{"id":19,"title":"Because Logistic Regression is built on Linear Regression and predicts probabilities before classification.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":20,"title":"Working","detail":null,"children":[{"id":21,"title":"Linear Equation (Wx + b)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":22,"title":"Sigmoid Function","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":23,"title":"Probability Output","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":24,"title":"Threshold (0.5) → Class Prediction","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":25,"title":"Why \"Regression\"?","detail":null,"children":[{"id":26,"title":"Predicts continuous probability.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":27,"title":"Classification happens after thresholding.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":28,"title":"Example","detail":null,"children":[{"id":29,"title":"Probability = 0.82 → Class = 1","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"}],"collapsed":false,"depth":1,"color":"c2"},{"id":30,"title":"Q3. What is Out-of-Bag (OOB) Error?","detail":null,"children":[{"id":31,"title":"Answer","detail":null,"children":[{"id":32,"title":"Samples not selected during bootstrap sampling are called Out-of-Bag samples.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":33,"title":"Used In","detail":null,"children":[{"id":34,"title":"Bagging","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":35,"title":"Random Forest","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":36,"title":"Why Useful?","detail":null,"children":[{"id":37,"title":"Acts as validation set.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":38,"title":"No separate test data required.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":39,"title":"Estimates model accuracy.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":40,"title":"Important Fact","detail":null,"children":[{"id":41,"title":"Around 36.8% of samples remain OOB.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":42,"title":"Example","detail":null,"children":[{"id":43,"title":"Train on bootstrap samples, test on OOB samples.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"}],"collapsed":false,"depth":1,"color":"c3"},{"id":44,"title":"Q4. Why is Naive Bayes called \"Naive\"?","detail":null,"children":[{"id":45,"title":"Answer","detail":null,"children":[{"id":46,"title":"Because it assumes all input features are conditionally independent.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":47,"title":"Naive Assumption","detail":null,"children":[{"id":48,"title":"Feature X1 has no dependency on X2.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":49,"title":"Advantage","detail":null,"children":[{"id":50,"title":"Simplifies probability calculations.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":51,"title":"Fast training.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":52,"title":"Works well on text data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":53,"title":"Limitation","detail":null,"children":[{"id":54,"title":"Feature independence rarely exists in real-world datasets.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":55,"title":"Example","detail":null,"children":[{"id":56,"title":"Spam email classification.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"}],"collapsed":false,"depth":1,"color":"c4"},{"id":57,"title":"Q5. What is the No Free Lunch Theorem?","detail":null,"children":[{"id":58,"title":"Answer","detail":null,"children":[{"id":59,"title":"No single Machine Learning algorithm performs best for every dataset.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":60,"title":"Meaning","detail":null,"children":[{"id":61,"title":"Different datasets require different algorithms.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":62,"title":"Performance depends on assumptions.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":63,"title":"Algorithm selection depends on the problem.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":64,"title":"Published","detail":null,"children":[{"id":65,"title":"David Wolpert (1996)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":66,"title":"Example","detail":null,"children":[{"id":67,"title":"CNN → Images","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":68,"title":"Naive Bayes → Text","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":69,"title":"Linear Regression → Linear Data","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":70,"title":"Interview Tip","detail":null,"children":[{"id":71,"title":"Always choose algorithms based on data characteristics.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"}],"collapsed":false,"depth":1,"color":"c5"},{"id":72,"title":"Q6. What is Semi-Supervised Learning?","detail":null,"children":[{"id":73,"title":"Answer","detail":null,"children":[{"id":74,"title":"Uses a small amount of labeled data and a large amount of unlabeled data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":75,"title":"Why Needed?","detail":null,"children":[{"id":76,"title":"Labeling data is expensive.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":77,"title":"Unlabeled data is easy to collect.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":78,"title":"Reduces labeling effort.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":79,"title":"Process","detail":null,"children":[{"id":80,"title":"Label a few samples.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":81,"title":"Learn patterns.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":82,"title":"Predict labels for remaining data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":83,"title":"Example","detail":null,"children":[{"id":84,"title":"Google Photos face recognition.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":85,"title":"Benefit","detail":null,"children":[{"id":86,"title":"High accuracy with fewer labeled samples.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"}],"collapsed":false,"depth":1,"color":"c6"},{"id":87,"title":"Interview Revision","detail":null,"children":[{"id":88,"title":"Decision Tree","detail":null,"children":[{"id":89,"title":"Explainability > Accuracy","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":90,"title":"Logistic Regression","detail":null,"children":[{"id":91,"title":"Predicts Probability first.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":92,"title":"OOB Error","detail":null,"children":[{"id":93,"title":"Internal Validation in Random Forest.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":94,"title":"Naive Bayes","detail":null,"children":[{"id":95,"title":"Assumes Feature Independence.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":96,"title":"No Free Lunch","detail":null,"children":[{"id":97,"title":"No Best Algorithm for Every Dataset.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":98,"title":"Semi-Supervised Learning","detail":null,"children":[{"id":99,"title":"Few Labels + Many Unlabeled Samples.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"}],"collapsed":false,"depth":0,"color":null};
+        let zoom = 1;
+
+        const elTreeInner = document.getElementById('tree-inner');
+        const elTreeScaled = document.getElementById('tree-scaled');
+        const elZoomLabel = document.getElementById('zoom-label');
+
+        function buildNodeWrapper(node, orderIndex) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+
+            const self = document.createElement('div');
+            self.className = 'node-self' + (node.depth === 0 ? ' is-root' : '');
+            self.dataset.id = node.id;
+            if (node.color) self.style.setProperty('--c', `var(--${node.color})`);
+            self.style.setProperty('--delay', (Math.min(orderIndex, 14) * 0.035) + 's');
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'n-title';
+            titleEl.textContent = node.title;
+            self.appendChild(titleEl);
+
+            if (node.detail) {
+                const detailEl = document.createElement('div');
+                detailEl.className = 'n-detail';
+                detailEl.textContent = node.detail;
+                self.appendChild(detailEl);
+            }
+
+            if (node.children.length > 0) {
+                const toggle = document.createElement('div');
+                toggle.className = 'toggle';
+                toggle.textContent = node.collapsed ? '+' : '−';
+                toggle.title = node.collapsed ? 'Expand' : 'Collapse';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    node.collapsed = !node.collapsed;
+                    render();
+                });
+                self.appendChild(toggle);
+            }
+
+            wrapper.appendChild(self);
+
+            if (node.children.length > 0 && !node.collapsed) {
+                const childrenBox = document.createElement('div');
+                childrenBox.className = 'node-children';
+                node.children.forEach((child, i) => {
+                    childrenBox.appendChild(buildNodeWrapper(child, orderIndex + i + 1));
+                });
+                wrapper.appendChild(childrenBox);
+            }
+
+            return wrapper;
+        }
+
+        function drawConnectors() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'connectors');
+            svg.setAttribute('width', elTreeInner.scrollWidth);
+            svg.setAttribute('height', elTreeInner.scrollHeight);
+
+            function walk(node) {
+                if (node.children.length === 0 || node.collapsed) return;
+                const parentEl = elTreeInner.querySelector(`.node-self[data-id="${node.id}"]`);
+                if (!parentEl) return;
+                const px = parentEl.offsetLeft + parentEl.offsetWidth;
+                const py = parentEl.offsetTop + parentEl.offsetHeight / 2;
+
+                node.children.forEach(child => {
+                    const childEl = elTreeInner.querySelector(`.node-self[data-id="${child.id}"]`);
+                    if (!childEl) return;
+                    const cx = childEl.offsetLeft;
+                    const cy = childEl.offsetTop + childEl.offsetHeight / 2;
+                    const midX = px + (cx - px) * 0.5;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${px},${py} C ${midX},${py} ${midX},${cy} ${cx},${cy}`);
+                    path.setAttribute('stroke', `var(--${child.color || 'root'})`);
+                    path.setAttribute('opacity', '0.75');
+                    svg.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('fill', `var(--${child.color || 'root'})`);
+                    svg.appendChild(dot);
+
+                    walk(child);
+                });
+            }
+            walk(treeData);
+            elTreeInner.appendChild(svg);
+        }
+
+        function updateScaledSize() {
+            const w = elTreeInner.scrollWidth;
+            const h = elTreeInner.scrollHeight;
+            elTreeScaled.style.transform = `scale(${zoom})`;
+            elTreeScaled.style.width = (w * zoom + 140) + 'px';
+            elTreeScaled.style.height = (h * zoom + 100) + 'px';
+            elZoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function render() {
+            if (!treeData) return;
+            elTreeInner.innerHTML = '';
+            elTreeInner.style.position = 'relative';
+            elTreeInner.appendChild(buildNodeWrapper(treeData, 0));
+            requestAnimationFrame(() => {
+                drawConnectors();
+                updateScaledSize();
+            });
+        }
+
+        function setAllCollapsed(node, value, isRoot = true) {
+            if (!isRoot) node.collapsed = value;
+            node.children.forEach(c => setAllCollapsed(c, value, false));
+        }
+
+        document.getElementById('btn-expand').addEventListener('click', () => { setAllCollapsed(treeData, false); render(); });
+        document.getElementById('btn-collapse').addEventListener('click', () => { setAllCollapsed(treeData, true); render(); });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1.8, +(zoom + 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.4, +(zoom - 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => { zoom = 1; updateScaledSize(); });
+
+        render();
+    </script>
+</body>
+</html>

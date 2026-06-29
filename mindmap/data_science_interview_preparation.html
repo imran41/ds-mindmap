@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Science Interview Preparation - Mind Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --bg-grid: rgba(255, 255, 255, 0.035);
+            --panel: #101a2e;
+            --panel-border: #1d2c47;
+            --ink: #E6EDF7;
+            --muted: #8694ab;
+            --root: #67E8F9;
+            --c1: #F2B84B;
+            --c2: #2DD4BF;
+            --c3: #FB7472;
+            --c4: #9B8CFF;
+            --c5: #4EA8DE;
+            --c6: #A3E635;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse 70% 50% at 18% 12%, rgba(103, 232, 249, 0.06), transparent 60%);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.65));
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        button {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 7px;
+            border: 1px solid var(--panel-border);
+            background: #15213a;
+            color: var(--ink);
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--root);
+            background: #192742;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            align-self: center;
+            margin-left: 4px;
+            min-width: 42px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        #tree-scaled {
+            transform-origin: top left;
+            padding: 50px 70px 100px;
+        }
+
+        #tree-inner {
+            position: relative;
+            display: inline-block;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .node-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+            margin-left: 78px;
+        }
+
+        .node-self {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            border: 1.5px solid var(--c, var(--root));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+            box-shadow:
+                0 4px 16px -8px rgba(0, 0, 0, 0.7),
+                0 0 16px -6px var(--c, var(--root));
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0;
+            animation: pop-in .42s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .node-self.is-root {
+            padding: 14px 22px;
+            border-width: 2px;
+            font-size: 15.5px;
+        }
+
+        .n-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .node-self.is-root .n-title {
+            font-size: 15.5px;
+            color: var(--root);
+        }
+
+        .n-detail {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .toggle {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #0b1220;
+            border: 1.5px solid var(--c, var(--root));
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .toggle:hover {
+            box-shadow: 0 0 10px -2px var(--c, var(--root));
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.connectors path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        svg.connectors circle {
+            r: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrap" id="canvas-wrap">
+        <div class="toolbar">
+            <button id="zoom-out">−</button>
+            <span class="zoom-label" id="zoom-label">100%</span>
+            <button id="zoom-in">+</button>
+            <button id="zoom-reset">Reset</button>
+            <div class="spacer"></div>
+            <button id="btn-expand">Expand All</button>
+            <button id="btn-collapse" style="margin-right: 8px;">Collapse All</button>
+        </div>
+        <div id="tree-scaled">
+            <div id="tree-inner"></div>
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 28px; background: rgba(11, 18, 32, 0.85); backdrop-filter: blur(4px); border-top: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; z-index: 10;">
+        Created by <b>Bihar Digital Data & Network</b> (<a href="https://bddn.in" target="_blank" style="color: var(--root); text-decoration: none;">bddn.in</a>)
+    </footer>
+
+    <script>
+        const treeData = {"id":0,"title":"Data Science Interview Preparation","detail":null,"children":[{"id":1,"title":"Data Preprocessing","detail":null,"children":[{"id":2,"title":"Definition","detail":null,"children":[{"id":3,"title":"Process of converting raw data into ML-ready data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":4,"title":"Other Names","detail":null,"children":[{"id":5,"title":"Data Cleaning","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":6,"title":"Data Preparation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":7,"title":"Data Wrangling","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":8,"title":"Data Munging","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":9,"title":"Data Organization","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":10,"title":"Data Transformation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":11,"title":"Data Scaling","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"},{"id":12,"title":"Balanced vs Imbalanced Data","detail":null,"children":[{"id":13,"title":"Interview Question","detail":null,"children":[{"id":14,"title":"How do you identify whether a dataset is balanced or imbalanced?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":15,"title":"Continuous Output","detail":null,"children":[{"id":16,"title":"Perform Normality Test","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":17,"title":"Normal Distribution","detail":null,"children":[{"id":18,"title":"Balanced Dataset","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"},{"id":19,"title":"Non-Normal Distribution","detail":null,"children":[{"id":20,"title":"Imbalanced Dataset","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"},{"id":21,"title":"Apply Transformation","detail":null,"children":[{"id":22,"title":"Manual Transformation","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":23,"title":"Box-Cox Transformation","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":24,"title":"Johnson Transformation","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"},{"id":25,"title":"If still Non-Normal","detail":null,"children":[{"id":26,"title":"K-Fold Cross Validation","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":27,"title":"Leave-One-Out CV","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":28,"title":"Other Sampling Methods","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":29,"title":"Categorical Output","detail":null,"children":[{"id":30,"title":"Rule","detail":null,"children":[{"id":31,"title":"Any class <30% → Imbalanced","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"},{"id":32,"title":"Example","detail":null,"children":[{"id":33,"title":"Default =10%","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":34,"title":"Non-Default =90%","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"},{"id":35,"title":"Techniques","detail":null,"children":[{"id":36,"title":"Random Oversampling","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":37,"title":"Random Undersampling","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":38,"title":"SMOTE","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":39,"title":"Modified SMOTE","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":40,"title":"Cross Validation","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"}],"collapsed":false,"depth":1,"color":"c2"},{"id":41,"title":"Why Normal Distribution?","detail":null,"children":[{"id":42,"title":"Interview Question","detail":null,"children":[{"id":43,"title":"Why convert data into normal distribution?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":44,"title":"Answer","detail":null,"children":[{"id":45,"title":"Most statistical techniques assume normality.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":46,"title":"Random sampling requires normal data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":47,"title":"Improves model reliability.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":48,"title":"Helps identify meaningful patterns.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"}],"collapsed":false,"depth":1,"color":"c3"},{"id":49,"title":"Multi-Class Imbalanced Data","detail":null,"children":[{"id":50,"title":"Interview Question","detail":null,"children":[{"id":51,"title":"How do you detect imbalance in multiclass data?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":52,"title":"Example","detail":null,"children":[{"id":53,"title":"Class A =30%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":54,"title":"Class B =30%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":55,"title":"Class C =30%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":56,"title":"Class D =10%","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":57,"title":"Solution","detail":null,"children":[{"id":58,"title":"Compare class frequencies.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":59,"title":"Experiment with balanced & imbalanced approaches.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":60,"title":"Choose model with better accuracy.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"}],"collapsed":false,"depth":1,"color":"c4"},{"id":61,"title":"Time Series Data","detail":null,"children":[{"id":62,"title":"Interview Question","detail":null,"children":[{"id":63,"title":"What is Time Series data?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":64,"title":"Answer","detail":null,"children":[{"id":65,"title":"Single variable","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":66,"title":"Sequential observations","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":67,"title":"Ordered by time","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":68,"title":"Example","detail":null,"children":[{"id":69,"title":"Monthly Sales (Jan, Feb, Mar...)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"}],"collapsed":false,"depth":1,"color":"c5"},{"id":70,"title":"Longitudinal (Panel) Data","detail":null,"children":[{"id":71,"title":"Interview Question","detail":null,"children":[{"id":72,"title":"Difference between Time Series and Longitudinal data?","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":73,"title":"Answer","detail":null,"children":[{"id":74,"title":"Multiple variables","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":75,"title":"Collected across time","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":76,"title":"Same entities observed repeatedly","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":77,"title":"Example","detail":null,"children":[{"id":78,"title":"Hyderabad Sales","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":79,"title":"Bengaluru Sales","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":80,"title":"Chennai Sales (Monthly)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"}],"collapsed":false,"depth":1,"color":"c6"},{"id":81,"title":"Data Preprocessing Steps","detail":null,"children":[{"id":82,"title":"Interview Question","detail":null,"children":[{"id":83,"title":"Explain the preprocessing sequence.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":84,"title":"Step 1","detail":null,"children":[{"id":85,"title":"Type Casting","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":86,"title":"Step 2","detail":null,"children":[{"id":87,"title":"Duplicate Detection","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":88,"title":"Step 3","detail":null,"children":[{"id":89,"title":"Outlier Analysis","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":90,"title":"Step 4","detail":null,"children":[{"id":91,"title":"Zero Variance Check","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":92,"title":"Step 5","detail":null,"children":[{"id":93,"title":"Missing Value Treatment","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":94,"title":"Step 6","detail":null,"children":[{"id":95,"title":"Discretization (Binning)","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":96,"title":"Step 7","detail":null,"children":[{"id":97,"title":"Encoding","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":98,"title":"Step 8","detail":null,"children":[{"id":99,"title":"Data Transformation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":100,"title":"Step 9","detail":null,"children":[{"id":101,"title":"Scaling / Normalization","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":102,"title":"Note","detail":null,"children":[{"id":103,"title":"Sequence depends on project requirements.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"},{"id":104,"title":"Type Casting","detail":null,"children":[{"id":105,"title":"Answer","detail":null,"children":[{"id":106,"title":"Verify Python correctly identifies data types.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":107,"title":"Purpose","detail":null,"children":[{"id":108,"title":"Prevent datatype errors.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":109,"title":"Ensure proper ML processing.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"}],"collapsed":false,"depth":1,"color":"c2"},{"id":110,"title":"Discretization","detail":null,"children":[{"id":111,"title":"Answer","detail":null,"children":[{"id":112,"title":"Convert continuous values into bins.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":113,"title":"Also Called","detail":null,"children":[{"id":114,"title":"Binning","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"}],"collapsed":false,"depth":1,"color":"c3"},{"id":115,"title":"Encoding","detail":null,"children":[{"id":116,"title":"Answer","detail":null,"children":[{"id":117,"title":"Convert categorical variables into numerical form.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":118,"title":"Examples","detail":null,"children":[{"id":119,"title":"Label Encoding","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":120,"title":"One-Hot Encoding","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":121,"title":"Ordinal Encoding","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"}],"collapsed":false,"depth":1,"color":"c4"},{"id":122,"title":"Scaling","detail":null,"children":[{"id":123,"title":"Answer","detail":null,"children":[{"id":124,"title":"Bring all features to a common range.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":125,"title":"Methods","detail":null,"children":[{"id":126,"title":"Standardization","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":127,"title":"Min-Max Scaling","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"},{"id":128,"title":"Robust Scaling","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"}],"collapsed":false,"depth":1,"color":"c5"},{"id":129,"title":"Transformation","detail":null,"children":[{"id":130,"title":"Purpose","detail":null,"children":[{"id":131,"title":"Reduce skewness.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":132,"title":"Improve normality.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":133,"title":"Enhance statistical assumptions.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":134,"title":"Methods","detail":null,"children":[{"id":135,"title":"Log Transformation","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":136,"title":"Box-Cox","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":137,"title":"Johnson","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":138,"title":"Square Root","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"}],"collapsed":false,"depth":1,"color":"c6"},{"id":139,"title":"Interview Tips","detail":null,"children":[{"id":140,"title":"Explain preprocessing using your project.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":141,"title":"Mention why each step is required.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":142,"title":"Distinguish continuous vs categorical imbalance.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":143,"title":"Explain normality before sampling.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":144,"title":"Know Time Series vs Longitudinal clearly.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c1"},{"id":145,"title":"Remember","detail":"Data preprocessing has no fixed sequence; it depends on business needs.","children":[],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"}],"collapsed":false,"depth":0,"color":null};
+        let zoom = 1;
+
+        const elTreeInner = document.getElementById('tree-inner');
+        const elTreeScaled = document.getElementById('tree-scaled');
+        const elZoomLabel = document.getElementById('zoom-label');
+
+        function buildNodeWrapper(node, orderIndex) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+
+            const self = document.createElement('div');
+            self.className = 'node-self' + (node.depth === 0 ? ' is-root' : '');
+            self.dataset.id = node.id;
+            if (node.color) self.style.setProperty('--c', `var(--${node.color})`);
+            self.style.setProperty('--delay', (Math.min(orderIndex, 14) * 0.035) + 's');
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'n-title';
+            titleEl.textContent = node.title;
+            self.appendChild(titleEl);
+
+            if (node.detail) {
+                const detailEl = document.createElement('div');
+                detailEl.className = 'n-detail';
+                detailEl.textContent = node.detail;
+                self.appendChild(detailEl);
+            }
+
+            if (node.children.length > 0) {
+                const toggle = document.createElement('div');
+                toggle.className = 'toggle';
+                toggle.textContent = node.collapsed ? '+' : '−';
+                toggle.title = node.collapsed ? 'Expand' : 'Collapse';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    node.collapsed = !node.collapsed;
+                    render();
+                });
+                self.appendChild(toggle);
+            }
+
+            wrapper.appendChild(self);
+
+            if (node.children.length > 0 && !node.collapsed) {
+                const childrenBox = document.createElement('div');
+                childrenBox.className = 'node-children';
+                node.children.forEach((child, i) => {
+                    childrenBox.appendChild(buildNodeWrapper(child, orderIndex + i + 1));
+                });
+                wrapper.appendChild(childrenBox);
+            }
+
+            return wrapper;
+        }
+
+        function drawConnectors() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'connectors');
+            svg.setAttribute('width', elTreeInner.scrollWidth);
+            svg.setAttribute('height', elTreeInner.scrollHeight);
+
+            function walk(node) {
+                if (node.children.length === 0 || node.collapsed) return;
+                const parentEl = elTreeInner.querySelector(`.node-self[data-id="${node.id}"]`);
+                if (!parentEl) return;
+                const px = parentEl.offsetLeft + parentEl.offsetWidth;
+                const py = parentEl.offsetTop + parentEl.offsetHeight / 2;
+
+                node.children.forEach(child => {
+                    const childEl = elTreeInner.querySelector(`.node-self[data-id="${child.id}"]`);
+                    if (!childEl) return;
+                    const cx = childEl.offsetLeft;
+                    const cy = childEl.offsetTop + childEl.offsetHeight / 2;
+                    const midX = px + (cx - px) * 0.5;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${px},${py} C ${midX},${py} ${midX},${cy} ${cx},${cy}`);
+                    path.setAttribute('stroke', `var(--${child.color || 'root'})`);
+                    path.setAttribute('opacity', '0.75');
+                    svg.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('fill', `var(--${child.color || 'root'})`);
+                    svg.appendChild(dot);
+
+                    walk(child);
+                });
+            }
+            walk(treeData);
+            elTreeInner.appendChild(svg);
+        }
+
+        function updateScaledSize() {
+            const w = elTreeInner.scrollWidth;
+            const h = elTreeInner.scrollHeight;
+            elTreeScaled.style.transform = `scale(${zoom})`;
+            elTreeScaled.style.width = (w * zoom + 140) + 'px';
+            elTreeScaled.style.height = (h * zoom + 100) + 'px';
+            elZoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function render() {
+            if (!treeData) return;
+            elTreeInner.innerHTML = '';
+            elTreeInner.style.position = 'relative';
+            elTreeInner.appendChild(buildNodeWrapper(treeData, 0));
+            requestAnimationFrame(() => {
+                drawConnectors();
+                updateScaledSize();
+            });
+        }
+
+        function setAllCollapsed(node, value, isRoot = true) {
+            if (!isRoot) node.collapsed = value;
+            node.children.forEach(c => setAllCollapsed(c, value, false));
+        }
+
+        document.getElementById('btn-expand').addEventListener('click', () => { setAllCollapsed(treeData, false); render(); });
+        document.getElementById('btn-collapse').addEventListener('click', () => { setAllCollapsed(treeData, true); render(); });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1.8, +(zoom + 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.4, +(zoom - 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => { zoom = 1; updateScaledSize(); });
+
+        render();
+    </script>
+</body>
+</html>
