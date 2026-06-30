@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variables - Mind Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --bg-grid: rgba(255, 255, 255, 0.035);
+            --panel: #101a2e;
+            --panel-border: #1d2c47;
+            --ink: #E6EDF7;
+            --muted: #8694ab;
+            --root: #67E8F9;
+            --c1: #F2B84B;
+            --c2: #2DD4BF;
+            --c3: #FB7472;
+            --c4: #9B8CFF;
+            --c5: #4EA8DE;
+            --c6: #A3E635;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse 70% 50% at 18% 12%, rgba(103, 232, 249, 0.06), transparent 60%);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.65));
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        button {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 7px;
+            border: 1px solid var(--panel-border);
+            background: #15213a;
+            color: var(--ink);
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--root);
+            background: #192742;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            align-self: center;
+            margin-left: 4px;
+            min-width: 42px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        #tree-scaled {
+            transform-origin: top left;
+            padding: 50px 70px 100px;
+        }
+
+        #tree-inner {
+            position: relative;
+            display: inline-block;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .node-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+            margin-left: 78px;
+        }
+
+        .node-self {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            border: 1.5px solid var(--c, var(--root));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+            box-shadow:
+                0 4px 16px -8px rgba(0, 0, 0, 0.7),
+                0 0 16px -6px var(--c, var(--root));
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0;
+            animation: pop-in .42s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .node-self.is-root {
+            padding: 14px 22px;
+            border-width: 2px;
+            font-size: 15.5px;
+        }
+
+        .n-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .node-self.is-root .n-title {
+            font-size: 15.5px;
+            color: var(--root);
+        }
+
+        .n-detail {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .toggle {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #0b1220;
+            border: 1.5px solid var(--c, var(--root));
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .toggle:hover {
+            box-shadow: 0 0 10px -2px var(--c, var(--root));
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.connectors path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        svg.connectors circle {
+            r: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrap" id="canvas-wrap">
+        <div class="toolbar">
+            <button id="zoom-out">−</button>
+            <span class="zoom-label" id="zoom-label">100%</span>
+            <button id="zoom-in">+</button>
+            <button id="zoom-reset">Reset</button>
+            <div class="spacer"></div>
+            <button id="btn-expand">Expand All</button>
+            <button id="btn-collapse" style="margin-right: 8px;">Collapse All</button>
+        </div>
+        <div id="tree-scaled">
+            <div id="tree-inner"></div>
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 28px; background: rgba(11, 18, 32, 0.85); backdrop-filter: blur(4px); border-top: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; z-index: 10;">
+        Created by <b>Bihar Digital Data & Network</b> (<a href="https://bddn.in" target="_blank" style="color: var(--root); text-decoration: none;">bddn.in</a>)
+    </footer>
+
+    <script>
+        const treeData = {"id":0,"title":"Variables","detail":null,"children":[{"id":1,"title":"Introduction","detail":null,"children":[{"id":2,"title":"Definition","detail":null,"children":[{"id":3,"title":"A variable is a property or characteristic that can take multiple values.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":4,"title":"Key Idea","detail":null,"children":[{"id":5,"title":"Value can change.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":6,"title":"Used to represent data.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":7,"title":"Every observation has a value for the variable.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":8,"title":"Examples","detail":null,"children":[{"id":9,"title":"Age","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":10,"title":"Height","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":11,"title":"Weight","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":12,"title":"Salary","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":13,"title":"Gender","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":14,"title":"Blood Group","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":15,"title":"Interview Question","detail":null,"children":[{"id":16,"title":"Q","detail":"What is a Variable?","children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":17,"title":"A","detail":"A variable is a characteristic or attribute that can take different values for different observations.","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":true,"depth":1,"color":"c1"},{"id":18,"title":"Characteristics of Variables","detail":null,"children":[{"id":19,"title":"Can have multiple values.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":20,"title":"Represents one property at a time.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":21,"title":"Used for analysis.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":22,"title":"Can be Numerical or Categorical.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c2"},{"id":23,"title":"Interview Question","detail":null,"children":[{"id":24,"title":"Q","detail":"Why do we use variables?","children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":25,"title":"A","detail":"Variables help represent and analyze different characteristics of data.","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"}],"collapsed":true,"depth":1,"color":"c2"},{"id":26,"title":"Examples of Variables","detail":null,"children":[{"id":27,"title":"Age","detail":null,"children":[{"id":28,"title":"20 Years","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":29,"title":"30 Years","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":30,"title":"45 Years","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":31,"title":"Height","detail":null,"children":[{"id":32,"title":"170 cm","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":33,"title":"172.5 cm","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":34,"title":"180 cm","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":35,"title":"Weight","detail":null,"children":[{"id":36,"title":"65 kg","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":37,"title":"72.5 kg","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":38,"title":"90 kg","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":39,"title":"Salary","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":40,"title":"Temperature","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"},{"id":41,"title":"Income","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c3"}],"collapsed":true,"depth":1,"color":"c3"},{"id":42,"title":"Types of Variables","detail":null,"children":[{"id":43,"title":"Quantitative Variables","detail":null,"children":[{"id":44,"title":"Definition","detail":null,"children":[{"id":45,"title":"Variables represented using numerical values.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"},{"id":46,"title":"Examples","detail":null,"children":[{"id":47,"title":"Age","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":48,"title":"Height","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":49,"title":"Weight","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":50,"title":"Salary","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":51,"title":"Temperature","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"},{"id":52,"title":"Further Divided Into","detail":null,"children":[{"id":53,"title":"Discrete Variable","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":54,"title":"Continuous Variable","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"},{"id":55,"title":"Interview Question","detail":null,"children":[{"id":56,"title":"Q","detail":"What is a Quantitative Variable?","children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":57,"title":"A","detail":"A variable represented by numerical values that can be measured or counted.","children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"},{"id":58,"title":"Qualitative (Categorical) Variables","detail":null,"children":[{"id":59,"title":"Definition","detail":null,"children":[{"id":60,"title":"Variables that classify observations into categories.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"},{"id":61,"title":"Examples","detail":null,"children":[{"id":62,"title":"Gender","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":63,"title":"Blood Group","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":64,"title":"Color","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":65,"title":"Department","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":66,"title":"Flower Type","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"},{"id":67,"title":"Classification Based","detail":null,"children":[{"id":68,"title":"Properties or Categories","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"},{"id":69,"title":"Interview Question","detail":null,"children":[{"id":70,"title":"Q","detail":"What is a Qualitative Variable?","children":[],"collapsed":true,"depth":4,"color":"c4"},{"id":71,"title":"A","detail":"A variable that represents categories instead of numerical values.","children":[],"collapsed":true,"depth":4,"color":"c4"}],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"}],"collapsed":true,"depth":1,"color":"c4"},{"id":72,"title":"Quantitative Variables","detail":null,"children":[{"id":73,"title":"Discrete Variable","detail":null,"children":[{"id":74,"title":"Definition","detail":null,"children":[{"id":75,"title":"Variables that take countable values.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"},{"id":76,"title":"Characteristics","detail":null,"children":[{"id":77,"title":"Finite or Countable","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":78,"title":"Whole Numbers","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":79,"title":"Cannot take decimal values between counts.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"},{"id":80,"title":"Examples","detail":null,"children":[{"id":81,"title":"Number of Students","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":82,"title":"Number of Children","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":83,"title":"Number of Cars","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":84,"title":"Number of Bank Accounts","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":85,"title":"Mobile Numbers Count","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":86,"title":"Number of Employees","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"},{"id":87,"title":"Interview Question","detail":null,"children":[{"id":88,"title":"Q","detail":"What is a Discrete Variable?","children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":89,"title":"A","detail":"A quantitative variable that takes countable integer values.","children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":90,"title":"Continuous Variable","detail":null,"children":[{"id":91,"title":"Definition","detail":null,"children":[{"id":92,"title":"Variables that can take any value within a range.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"},{"id":93,"title":"Characteristics","detail":null,"children":[{"id":94,"title":"Infinite Possible Values","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":95,"title":"Decimal Values Allowed","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":96,"title":"Measured","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":97,"title":"Continuous Scale","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"},{"id":98,"title":"Examples","detail":null,"children":[{"id":99,"title":"Height","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":100,"title":"Weight","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":101,"title":"Temperature","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":102,"title":"Time","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":103,"title":"Distance","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":104,"title":"Speed","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"},{"id":105,"title":"Interview Question","detail":null,"children":[{"id":106,"title":"Q","detail":"What is a Continuous Variable?","children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":107,"title":"A","detail":"A quantitative variable that can take infinitely many values within an interval.","children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"}],"collapsed":true,"depth":1,"color":"c5"},{"id":108,"title":"Qualitative (Categorical) Variables","detail":null,"children":[{"id":109,"title":"Definition","detail":null,"children":[{"id":110,"title":"Used to classify observations into groups.","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":111,"title":"Examples","detail":null,"children":[{"id":112,"title":"Gender","detail":null,"children":[{"id":113,"title":"Male","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":114,"title":"Female","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"}],"collapsed":true,"depth":3,"color":"c6"},{"id":115,"title":"Blood Group","detail":null,"children":[{"id":116,"title":"A","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":117,"title":"B","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":118,"title":"AB","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":119,"title":"O","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"}],"collapsed":true,"depth":3,"color":"c6"},{"id":120,"title":"Flower Type","detail":null,"children":[{"id":121,"title":"Rose","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":122,"title":"Lily","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":123,"title":"Lotus","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"}],"collapsed":true,"depth":3,"color":"c6"},{"id":124,"title":"Department","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":125,"title":"Country","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":126,"title":"City","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"},{"id":127,"title":"Interview Question","detail":null,"children":[{"id":128,"title":"Q","detail":"Give examples of Categorical Variables.","children":[],"collapsed":true,"depth":3,"color":"c6"},{"id":129,"title":"A:","detail":null,"children":[{"id":130,"title":"Gender","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":131,"title":"Blood Group","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":132,"title":"Color","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":133,"title":"Department","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"},{"id":134,"title":"Flower Type","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c6"}],"collapsed":true,"depth":3,"color":"c6"}],"collapsed":true,"depth":2,"color":"c6"}],"collapsed":true,"depth":1,"color":"c6"},{"id":135,"title":"Discrete vs Continuous","detail":null,"children":[{"id":136,"title":"Discrete","detail":null,"children":[{"id":137,"title":"Counted","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":138,"title":"Whole Numbers","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":139,"title":"Finite/Countable","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":140,"title":"Example","detail":"Number of Students","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":141,"title":"Continuous","detail":null,"children":[{"id":142,"title":"Measured","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":143,"title":"Decimal Values","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":144,"title":"Infinite Values","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":145,"title":"Example","detail":"Height","children":[],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"},{"id":146,"title":"Interview Question","detail":null,"children":[{"id":147,"title":"Q","detail":"Difference between Discrete and Continuous Variables?","children":[],"collapsed":true,"depth":3,"color":"c1"},{"id":148,"title":"A:","detail":null,"children":[{"id":149,"title":"Discrete variables are counted.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":150,"title":"Continuous variables are measured.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":151,"title":"Discrete values are countable.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"},{"id":152,"title":"Continuous values are infinite within a range.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c1"}],"collapsed":true,"depth":3,"color":"c1"}],"collapsed":true,"depth":2,"color":"c1"}],"collapsed":true,"depth":1,"color":"c1"},{"id":153,"title":"Quantitative vs Qualitative","detail":null,"children":[{"id":154,"title":"Quantitative","detail":null,"children":[{"id":155,"title":"Numerical","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":156,"title":"Arithmetic Operations Possible","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":157,"title":"Examples","detail":"Age, Height, Weight","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":158,"title":"Qualitative","detail":null,"children":[{"id":159,"title":"Categories","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":160,"title":"Labels","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":161,"title":"Examples","detail":"Gender, Color","children":[],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"},{"id":162,"title":"Interview Question","detail":null,"children":[{"id":163,"title":"Q","detail":"Difference between Quantitative and Qualitative Variables?","children":[],"collapsed":true,"depth":3,"color":"c2"},{"id":164,"title":"A:","detail":null,"children":[{"id":165,"title":"Quantitative variables are numeric.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"},{"id":166,"title":"Qualitative variables represent categories.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c2"}],"collapsed":true,"depth":3,"color":"c2"}],"collapsed":true,"depth":2,"color":"c2"}],"collapsed":true,"depth":1,"color":"c2"},{"id":167,"title":"Real World Examples","detail":null,"children":[{"id":168,"title":"Student Dataset","detail":null,"children":[{"id":169,"title":"Age → Continuous","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":170,"title":"Marks → Continuous","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":171,"title":"Roll Number → Discrete","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":172,"title":"Gender → Categorical","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":173,"title":"Blood Group → Categorical","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"},{"id":174,"title":"Hospital Dataset","detail":null,"children":[{"id":175,"title":"Weight → Continuous","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":176,"title":"Temperature → Continuous","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":177,"title":"Patient ID → Discrete","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"},{"id":178,"title":"Disease Type → Categorical","detail":null,"children":[],"collapsed":true,"depth":3,"color":"c3"}],"collapsed":true,"depth":2,"color":"c3"}],"collapsed":true,"depth":1,"color":"c3"},{"id":179,"title":"Common Interview Mistakes","detail":null,"children":[{"id":180,"title":"Mobile Number is NOT Continuous.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":181,"title":"Roll Number is NOT Continuous.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":182,"title":"ID is NOT Continuous.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":183,"title":"Height is Continuous.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":184,"title":"Weight is Continuous.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":185,"title":"Gender is Categorical.","detail":null,"children":[],"collapsed":true,"depth":2,"color":"c4"},{"id":186,"title":"Interview Question","detail":null,"children":[{"id":187,"title":"Q","detail":"Is Mobile Number a Continuous Variable?","children":[],"collapsed":true,"depth":3,"color":"c4"},{"id":188,"title":"A","detail":"No. It is an identifier (Discrete/Categorical), not a measurable quantity.","children":[],"collapsed":true,"depth":3,"color":"c4"}],"collapsed":true,"depth":2,"color":"c4"}],"collapsed":true,"depth":1,"color":"c4"},{"id":189,"title":"Interview Summary","detail":null,"children":[{"id":190,"title":"Q","detail":"What is a Variable?","children":[{"id":191,"title":"A","detail":"A property that can take multiple values.","children":[],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":192,"title":"Q","detail":"Types of Variables?","children":[{"id":193,"title":"A:","detail":null,"children":[{"id":194,"title":"Quantitative","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":195,"title":"Qualitative","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":196,"title":"Q","detail":"Types of Quantitative Variables?","children":[{"id":197,"title":"A:","detail":null,"children":[{"id":198,"title":"Discrete","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":199,"title":"Continuous","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":200,"title":"Q","detail":"Example of Discrete Variable?","children":[{"id":201,"title":"A:","detail":null,"children":[{"id":202,"title":"Number of Students","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":203,"title":"Number of Cars","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":204,"title":"Number of Children","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":205,"title":"Q","detail":"Example of Continuous Variable?","children":[{"id":206,"title":"A:","detail":null,"children":[{"id":207,"title":"Height","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":208,"title":"Weight","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":209,"title":"Temperature","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":210,"title":"Time","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":211,"title":"Q","detail":"Example of Qualitative Variable?","children":[{"id":212,"title":"A:","detail":null,"children":[{"id":213,"title":"Gender","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":214,"title":"Blood Group","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":215,"title":"Color","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":216,"title":"Flower Type","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"},{"id":217,"title":"Q","detail":"Why are variables important in Data Science?","children":[{"id":218,"title":"A:","detail":null,"children":[{"id":219,"title":"Represent data attributes.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":220,"title":"Help perform analysis.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":221,"title":"Build statistical models.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"},{"id":222,"title":"Train machine learning algorithms.","detail":null,"children":[],"collapsed":true,"depth":4,"color":"c5"}],"collapsed":true,"depth":3,"color":"c5"}],"collapsed":true,"depth":2,"color":"c5"}],"collapsed":true,"depth":1,"color":"c5"}],"collapsed":false,"depth":0,"color":null};
+        let zoom = 1;
+
+        const elTreeInner = document.getElementById('tree-inner');
+        const elTreeScaled = document.getElementById('tree-scaled');
+        const elZoomLabel = document.getElementById('zoom-label');
+
+        function buildNodeWrapper(node, orderIndex) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+
+            const self = document.createElement('div');
+            self.className = 'node-self' + (node.depth === 0 ? ' is-root' : '');
+            self.dataset.id = node.id;
+            if (node.color) self.style.setProperty('--c', `var(--${node.color})`);
+            self.style.setProperty('--delay', (Math.min(orderIndex, 14) * 0.035) + 's');
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'n-title';
+            titleEl.textContent = node.title;
+            self.appendChild(titleEl);
+
+            if (node.detail) {
+                const detailEl = document.createElement('div');
+                detailEl.className = 'n-detail';
+                detailEl.textContent = node.detail;
+                self.appendChild(detailEl);
+            }
+
+            if (node.children.length > 0) {
+                const toggle = document.createElement('div');
+                toggle.className = 'toggle';
+                toggle.textContent = node.collapsed ? '+' : '−';
+                toggle.title = node.collapsed ? 'Expand' : 'Collapse';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    node.collapsed = !node.collapsed;
+                    render();
+                });
+                self.appendChild(toggle);
+            }
+
+            wrapper.appendChild(self);
+
+            if (node.children.length > 0 && !node.collapsed) {
+                const childrenBox = document.createElement('div');
+                childrenBox.className = 'node-children';
+                node.children.forEach((child, i) => {
+                    childrenBox.appendChild(buildNodeWrapper(child, orderIndex + i + 1));
+                });
+                wrapper.appendChild(childrenBox);
+            }
+
+            return wrapper;
+        }
+
+        function drawConnectors() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'connectors');
+            svg.setAttribute('width', elTreeInner.scrollWidth);
+            svg.setAttribute('height', elTreeInner.scrollHeight);
+
+            function walk(node) {
+                if (node.children.length === 0 || node.collapsed) return;
+                const parentEl = elTreeInner.querySelector(`.node-self[data-id="${node.id}"]`);
+                if (!parentEl) return;
+                const px = parentEl.offsetLeft + parentEl.offsetWidth;
+                const py = parentEl.offsetTop + parentEl.offsetHeight / 2;
+
+                node.children.forEach(child => {
+                    const childEl = elTreeInner.querySelector(`.node-self[data-id="${child.id}"]`);
+                    if (!childEl) return;
+                    const cx = childEl.offsetLeft;
+                    const cy = childEl.offsetTop + childEl.offsetHeight / 2;
+                    const midX = px + (cx - px) * 0.5;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${px},${py} C ${midX},${py} ${midX},${cy} ${cx},${cy}`);
+                    path.setAttribute('stroke', `var(--${child.color || 'root'})`);
+                    path.setAttribute('opacity', '0.75');
+                    svg.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('fill', `var(--${child.color || 'root'})`);
+                    svg.appendChild(dot);
+
+                    walk(child);
+                });
+            }
+            walk(treeData);
+            elTreeInner.appendChild(svg);
+        }
+
+        function updateScaledSize() {
+            const w = elTreeInner.scrollWidth;
+            const h = elTreeInner.scrollHeight;
+            elTreeScaled.style.transform = `scale(${zoom})`;
+            elTreeScaled.style.width = (w * zoom + 140) + 'px';
+            elTreeScaled.style.height = (h * zoom + 100) + 'px';
+            elZoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function render() {
+            if (!treeData) return;
+            elTreeInner.innerHTML = '';
+            elTreeInner.style.position = 'relative';
+            elTreeInner.appendChild(buildNodeWrapper(treeData, 0));
+            requestAnimationFrame(() => {
+                drawConnectors();
+                updateScaledSize();
+            });
+        }
+
+        function setAllCollapsed(node, value, isRoot = true) {
+            if (!isRoot) node.collapsed = value;
+            node.children.forEach(c => setAllCollapsed(c, value, false));
+        }
+
+        document.getElementById('btn-expand').addEventListener('click', () => { setAllCollapsed(treeData, false); render(); });
+        document.getElementById('btn-collapse').addEventListener('click', () => { setAllCollapsed(treeData, true); render(); });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1.8, +(zoom + 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.4, +(zoom - 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => { zoom = 1; updateScaledSize(); });
+
+        render();
+    </script>
+</body>
+</html>
