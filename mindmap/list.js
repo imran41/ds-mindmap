@@ -7,5 +7,6 @@ window.mindmapFiles = [
   "rag_retrieval_augmented_generation.html",
   "percentile_quartiles.html",
   "normal_distribution_gaussian_distribution_.html",
-  "central_limit_theorem_clt_.html"
+  "central_limit_theorem_clt_.html",
+  "variables.html"
 ];
