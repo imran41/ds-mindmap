@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measures of Central Tendency - Mind Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0B1220;
+            --bg-grid: rgba(255, 255, 255, 0.035);
+            --panel: #101a2e;
+            --panel-border: #1d2c47;
+            --ink: #E6EDF7;
+            --muted: #8694ab;
+            --root: #67E8F9;
+            --c1: #F2B84B;
+            --c2: #2DD4BF;
+            --c3: #FB7472;
+            --c4: #9B8CFF;
+            --c5: #4EA8DE;
+            --c6: #A3E635;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--bg);
+            background-image:
+                linear-gradient(var(--bg-grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+            background-size: 28px 28px;
+            color: var(--ink);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .canvas-wrap {
+            position: relative;
+            overflow: auto;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(ellipse 70% 50% at 18% 12%, rgba(103, 232, 249, 0.06), transparent 60%);
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(180deg, rgba(11, 18, 32, 0.92), rgba(11, 18, 32, 0.65));
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        button {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 7px;
+            border: 1px solid var(--panel-border);
+            background: #15213a;
+            color: var(--ink);
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: transform .12s ease, border-color .15s ease, background .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--root);
+            background: #192742;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--muted);
+            align-self: center;
+            margin-left: 4px;
+            min-width: 42px;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        #tree-scaled {
+            transform-origin: top left;
+            padding: 50px 70px 100px;
+        }
+
+        #tree-inner {
+            position: relative;
+            display: inline-block;
+        }
+
+        .node-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .node-children {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 18px;
+            margin-left: 78px;
+        }
+
+        .node-self {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px 18px;
+            border-radius: 9px;
+            border: 1.5px solid var(--c, var(--root));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+            box-shadow:
+                0 4px 16px -8px rgba(0, 0, 0, 0.7),
+                0 0 16px -6px var(--c, var(--root));
+            white-space: nowrap;
+            z-index: 2;
+            opacity: 0;
+            animation: pop-in .42s cubic-bezier(.2, .8, .2, 1) forwards;
+            animation-delay: var(--delay, 0s);
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: scale(.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .node-self.is-root {
+            padding: 14px 22px;
+            border-width: 2px;
+            font-size: 15.5px;
+        }
+
+        .n-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .node-self.is-root .n-title {
+            font-size: 15.5px;
+            color: var(--root);
+        }
+
+        .n-detail {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .toggle {
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #0b1220;
+            border: 1.5px solid var(--c, var(--root));
+            color: var(--ink);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 3;
+            user-select: none;
+        }
+
+        .toggle:hover {
+            box-shadow: 0 0 10px -2px var(--c, var(--root));
+        }
+
+        svg.connectors {
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: visible;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        svg.connectors path {
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        svg.connectors circle {
+            r: 3;
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-wrap" id="canvas-wrap">
+        <div class="toolbar">
+            <button id="zoom-out">−</button>
+            <span class="zoom-label" id="zoom-label">100%</span>
+            <button id="zoom-in">+</button>
+            <button id="zoom-reset">Reset</button>
+            <div class="spacer"></div>
+            <button id="btn-expand">Expand All</button>
+            <button id="btn-collapse" style="margin-right: 8px;">Collapse All</button>
+        </div>
+        <div id="tree-scaled">
+            <div id="tree-inner"></div>
+        </div>
+    </div>
+
+    <footer style="position: fixed; bottom: 0; left: 0; right: 0; padding: 10px 28px; background: rgba(11, 18, 32, 0.85); backdrop-filter: blur(4px); border-top: 1px solid var(--panel-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-align: center; z-index: 10;">
+        Created by <b>Bihar Digital Data & Network</b> (<a href="https://bddn.in" target="_blank" style="color: var(--root); text-decoration: none;">bddn.in</a>)
+    </footer>
+
+    <script>
+        const treeData = {"id":0,"title":"Measures of Central Tendency","detail":null,"children":[{"id":1,"title":"Introduction","detail":null,"children":[{"id":2,"title":"Definition","detail":null,"children":[{"id":3,"title":"Measures of Central Tendency are statistical measures used to find the central or representative value of a dataset.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":4,"title":"Purpose","detail":null,"children":[{"id":5,"title":"Summarize data with one value.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"},{"id":6,"title":"Represent the center of the distribution.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"},{"id":7,"title":"Compare different datasets.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":8,"title":"Types","detail":null,"children":[{"id":9,"title":"Mean","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"},{"id":10,"title":"Median","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"},{"id":11,"title":"Mode","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"},{"id":12,"title":"Mean (Average)","detail":null,"children":[{"id":13,"title":"Definition","detail":null,"children":[{"id":14,"title":"Sum of all observations divided by the total number of observations.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":15,"title":"Population Mean","detail":null,"children":[{"id":16,"title":"Symbol","detail":"μ (Mu)","children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":17,"title":"Formula:","detail":null,"children":[{"id":18,"title":"μ = ΣXi / N","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"},{"id":19,"title":"N = Population Size","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":20,"title":"Used when entire population is available.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":21,"title":"Sample Mean","detail":null,"children":[{"id":22,"title":"Symbol","detail":"x̄ (x-bar)","children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":23,"title":"Formula:","detail":null,"children":[{"id":24,"title":"x̄ = ΣXi / n","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c2"}],"collapsed":false,"depth":3,"color":"c2"},{"id":25,"title":"n = Sample Size","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":26,"title":"Used for sample data.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":27,"title":"Example","detail":null,"children":[{"id":28,"title":"Data = {1,2,2,2,3,4,5}","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":29,"title":"Sum = 19","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":30,"title":"n = 7","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":31,"title":"Mean = 19/7 = 2.71","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":32,"title":"Advantages","detail":null,"children":[{"id":33,"title":"Easy to calculate.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":34,"title":"Uses all observations.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":35,"title":"Most commonly used.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":36,"title":"Disadvantages","detail":null,"children":[{"id":37,"title":"Highly affected by outliers.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":38,"title":"Not suitable for skewed data.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":39,"title":"Can give misleading results.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":40,"title":"Interview Questions","detail":null,"children":[{"id":41,"title":"What is Mean?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":42,"title":"Difference between Population Mean and Sample Mean?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"},{"id":43,"title":"Why is Mean affected by Outliers?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"}],"collapsed":false,"depth":1,"color":"c2"},{"id":44,"title":"Median","detail":null,"children":[{"id":45,"title":"Definition","detail":null,"children":[{"id":46,"title":"Middle value of the sorted dataset.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":47,"title":"Steps","detail":null,"children":[{"id":48,"title":"Arrange data in ascending order.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":49,"title":"Find middle observation.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":50,"title":"If even observations → average of two middle values.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":51,"title":"Odd Number of Observations","detail":null,"children":[{"id":52,"title":"Example:","detail":null,"children":[{"id":53,"title":"{1,2,3,4,5}","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c3"}],"collapsed":false,"depth":3,"color":"c3"},{"id":54,"title":"Median = 3","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":55,"title":"Even Number of Observations","detail":null,"children":[{"id":56,"title":"Example:","detail":null,"children":[{"id":57,"title":"{1,2,3,4,5,6}","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c3"}],"collapsed":false,"depth":3,"color":"c3"},{"id":58,"title":"Middle values = 3 and 4","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":59,"title":"Median = (3+4)/2 = 3.5","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":60,"title":"Effect of Outliers","detail":null,"children":[{"id":61,"title":"Data = {1,2,2,2,3,4,100}","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":62,"title":"Mean changes drastically.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":63,"title":"Median remains 2.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":64,"title":"Advantages","detail":null,"children":[{"id":65,"title":"Robust to outliers.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":66,"title":"Works well for skewed distributions.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":67,"title":"Preferred for income/salary data.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":68,"title":"Disadvantages","detail":null,"children":[{"id":69,"title":"Doesn't use all observations.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"},{"id":70,"title":"Interview Questions","detail":null,"children":[{"id":71,"title":"What is Median?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":72,"title":"When should Median be preferred over Mean?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"},{"id":73,"title":"Why is Median resistant to outliers?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c3"}],"collapsed":false,"depth":2,"color":"c3"}],"collapsed":false,"depth":1,"color":"c3"},{"id":74,"title":"Mode","detail":null,"children":[{"id":75,"title":"Definition","detail":null,"children":[{"id":76,"title":"Most frequently occurring value in the dataset.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":77,"title":"Example","detail":null,"children":[{"id":78,"title":"Data = {1,2,2,2,3,4,5,5,5,5}","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":79,"title":"Mode = 5","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":80,"title":"Types","detail":null,"children":[{"id":81,"title":"Unimodal","detail":null,"children":[{"id":82,"title":"One mode","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c4"}],"collapsed":false,"depth":3,"color":"c4"},{"id":83,"title":"Bimodal","detail":null,"children":[{"id":84,"title":"Two modes","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c4"}],"collapsed":false,"depth":3,"color":"c4"},{"id":85,"title":"Multimodal","detail":null,"children":[{"id":86,"title":"Multiple modes","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c4"}],"collapsed":false,"depth":3,"color":"c4"},{"id":87,"title":"No Mode","detail":null,"children":[{"id":88,"title":"No repeated values","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c4"}],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":89,"title":"Advantages","detail":null,"children":[{"id":90,"title":"Works with categorical data.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":91,"title":"Easy to identify.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":92,"title":"Not affected by outliers.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":93,"title":"Disadvantages","detail":null,"children":[{"id":94,"title":"May have multiple answers.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":95,"title":"May not exist.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":96,"title":"Interview Questions","detail":null,"children":[{"id":97,"title":"What is Mode?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":98,"title":"Can a dataset have two modes?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":99,"title":"Can Mode be used for categorical variables?","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"}],"collapsed":false,"depth":1,"color":"c4"},{"id":100,"title":"Mean vs Median vs Mode","detail":null,"children":[{"id":101,"title":"Mean","detail":null,"children":[{"id":102,"title":"Uses all observations","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"},{"id":103,"title":"Sensitive to outliers","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"},{"id":104,"title":"Best for symmetric distributions","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":105,"title":"Median","detail":null,"children":[{"id":106,"title":"Middle observation","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"},{"id":107,"title":"Resistant to outliers","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"},{"id":108,"title":"Best for skewed distributions","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"},{"id":109,"title":"Mode","detail":null,"children":[{"id":110,"title":"Most frequent value","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"},{"id":111,"title":"Works with categorical data","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"},{"id":112,"title":"Good for frequency analysis","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c5"}],"collapsed":false,"depth":2,"color":"c5"}],"collapsed":false,"depth":1,"color":"c5"},{"id":113,"title":"Outlier Example","detail":null,"children":[{"id":114,"title":"Dataset A","detail":null,"children":[{"id":115,"title":"{1,2,2,2,3,4,5}","detail":null,"children":[{"id":116,"title":"Mean = 2.71","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c6"},{"id":117,"title":"Median = 2","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c6"},{"id":118,"title":"Mode = 2","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c6"}],"collapsed":false,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"},{"id":119,"title":"Dataset B","detail":null,"children":[{"id":120,"title":"{1,2,2,2,3,4,100}","detail":null,"children":[{"id":121,"title":"Mean increases significantly","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c6"},{"id":122,"title":"Median remains stable","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c6"},{"id":123,"title":"Mode remains unchanged","detail":null,"children":[],"collapsed":false,"depth":4,"color":"c6"}],"collapsed":false,"depth":3,"color":"c6"}],"collapsed":false,"depth":2,"color":"c6"}],"collapsed":false,"depth":1,"color":"c6"},{"id":124,"title":"Missing Value Imputation","detail":null,"children":[{"id":125,"title":"Numerical Data","detail":null,"children":[{"id":126,"title":"Normal Distribution → Mean","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"},{"id":127,"title":"Skewed Distribution → Median","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"},{"id":128,"title":"Outliers Present → Median","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"},{"id":129,"title":"Categorical Data","detail":null,"children":[{"id":130,"title":"Mode","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c1"}],"collapsed":false,"depth":2,"color":"c1"}],"collapsed":false,"depth":1,"color":"c1"},{"id":131,"title":"Real-World Examples","detail":null,"children":[{"id":132,"title":"Salary Dataset","detail":null,"children":[{"id":133,"title":"Median preferred due to high-income outliers.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":134,"title":"Student Marks","detail":null,"children":[{"id":135,"title":"Mean commonly used.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":136,"title":"Shoe Size Survey","detail":null,"children":[{"id":137,"title":"Mode identifies most common size.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"},{"id":138,"title":"Gender Column","detail":null,"children":[{"id":139,"title":"Mode used for missing values.","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c2"}],"collapsed":false,"depth":2,"color":"c2"}],"collapsed":false,"depth":1,"color":"c2"},{"id":140,"title":"Interview Tips","detail":null,"children":[{"id":141,"title":"Mean is affected by outliers.","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c3"},{"id":142,"title":"Median is robust to outliers.","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c3"},{"id":143,"title":"Mode works for categorical features.","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c3"},{"id":144,"title":"Mean uses every observation.","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c3"},{"id":145,"title":"Median requires sorted data.","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c3"},{"id":146,"title":"Mode identifies highest frequency.","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c3"}],"collapsed":false,"depth":1,"color":"c3"},{"id":147,"title":"Quick Interview Revision","detail":null,"children":[{"id":148,"title":"Mean","detail":null,"children":[{"id":149,"title":"Formula = ΣX / n","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":150,"title":"Uses all values","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":151,"title":"Sensitive to outliers","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":152,"title":"Median","detail":null,"children":[{"id":153,"title":"Middle value","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":154,"title":"Sort data first","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":155,"title":"Resistant to outliers","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":156,"title":"Mode","detail":null,"children":[{"id":157,"title":"Highest frequency","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":158,"title":"Useful for categorical variables","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":159,"title":"Not affected by outliers","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":160,"title":"Population Mean Symbol = μ","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c4"},{"id":161,"title":"Sample Mean Symbol = x̄","detail":null,"children":[],"collapsed":false,"depth":2,"color":"c4"},{"id":162,"title":"Numerical Missing Values","detail":null,"children":[{"id":163,"title":"Normal → Mean","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"},{"id":164,"title":"Skewed → Median","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"},{"id":165,"title":"Categorical Missing Values","detail":null,"children":[{"id":166,"title":"Mode","detail":null,"children":[],"collapsed":false,"depth":3,"color":"c4"}],"collapsed":false,"depth":2,"color":"c4"}],"collapsed":false,"depth":1,"color":"c4"}],"collapsed":false,"depth":0,"color":null};
+        let zoom = 1;
+
+        const elTreeInner = document.getElementById('tree-inner');
+        const elTreeScaled = document.getElementById('tree-scaled');
+        const elZoomLabel = document.getElementById('zoom-label');
+
+        function buildNodeWrapper(node, orderIndex) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'node-wrapper';
+
+            const self = document.createElement('div');
+            self.className = 'node-self' + (node.depth === 0 ? ' is-root' : '');
+            self.dataset.id = node.id;
+            if (node.color) self.style.setProperty('--c', `var(--${node.color})`);
+            self.style.setProperty('--delay', (Math.min(orderIndex, 14) * 0.035) + 's');
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'n-title';
+            titleEl.textContent = node.title;
+            self.appendChild(titleEl);
+
+            if (node.detail) {
+                const detailEl = document.createElement('div');
+                detailEl.className = 'n-detail';
+                detailEl.textContent = node.detail;
+                self.appendChild(detailEl);
+            }
+
+            if (node.children.length > 0) {
+                const toggle = document.createElement('div');
+                toggle.className = 'toggle';
+                toggle.textContent = node.collapsed ? '+' : '−';
+                toggle.title = node.collapsed ? 'Expand' : 'Collapse';
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    node.collapsed = !node.collapsed;
+                    render();
+                });
+                self.appendChild(toggle);
+            }
+
+            wrapper.appendChild(self);
+
+            if (node.children.length > 0 && !node.collapsed) {
+                const childrenBox = document.createElement('div');
+                childrenBox.className = 'node-children';
+                node.children.forEach((child, i) => {
+                    childrenBox.appendChild(buildNodeWrapper(child, orderIndex + i + 1));
+                });
+                wrapper.appendChild(childrenBox);
+            }
+
+            return wrapper;
+        }
+
+        function drawConnectors() {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'connectors');
+            svg.setAttribute('width', elTreeInner.scrollWidth);
+            svg.setAttribute('height', elTreeInner.scrollHeight);
+
+            function walk(node) {
+                if (node.children.length === 0 || node.collapsed) return;
+                const parentEl = elTreeInner.querySelector(`.node-self[data-id="${node.id}"]`);
+                if (!parentEl) return;
+                const px = parentEl.offsetLeft + parentEl.offsetWidth;
+                const py = parentEl.offsetTop + parentEl.offsetHeight / 2;
+
+                node.children.forEach(child => {
+                    const childEl = elTreeInner.querySelector(`.node-self[data-id="${child.id}"]`);
+                    if (!childEl) return;
+                    const cx = childEl.offsetLeft;
+                    const cy = childEl.offsetTop + childEl.offsetHeight / 2;
+                    const midX = px + (cx - px) * 0.5;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${px},${py} C ${midX},${py} ${midX},${cy} ${cx},${cy}`);
+                    path.setAttribute('stroke', `var(--${child.color || 'root'})`);
+                    path.setAttribute('opacity', '0.75');
+                    svg.appendChild(path);
+
+                    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    dot.setAttribute('cx', cx);
+                    dot.setAttribute('cy', cy);
+                    dot.setAttribute('fill', `var(--${child.color || 'root'})`);
+                    svg.appendChild(dot);
+
+                    walk(child);
+                });
+            }
+            walk(treeData);
+            elTreeInner.appendChild(svg);
+        }
+
+        function updateScaledSize() {
+            const w = elTreeInner.scrollWidth;
+            const h = elTreeInner.scrollHeight;
+            elTreeScaled.style.transform = `scale(${zoom})`;
+            elTreeScaled.style.width = (w * zoom + 140) + 'px';
+            elTreeScaled.style.height = (h * zoom + 100) + 'px';
+            elZoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+
+        function render() {
+            if (!treeData) return;
+            elTreeInner.innerHTML = '';
+            elTreeInner.style.position = 'relative';
+            elTreeInner.appendChild(buildNodeWrapper(treeData, 0));
+            requestAnimationFrame(() => {
+                drawConnectors();
+                updateScaledSize();
+            });
+        }
+
+        function setAllCollapsed(node, value, isRoot = true) {
+            if (!isRoot) node.collapsed = value;
+            node.children.forEach(c => setAllCollapsed(c, value, false));
+        }
+
+        document.getElementById('btn-expand').addEventListener('click', () => { setAllCollapsed(treeData, false); render(); });
+        document.getElementById('btn-collapse').addEventListener('click', () => { setAllCollapsed(treeData, true); render(); });
+
+        document.getElementById('zoom-in').addEventListener('click', () => { zoom = Math.min(1.8, +(zoom + 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-out').addEventListener('click', () => { zoom = Math.max(0.4, +(zoom - 0.1).toFixed(2)); updateScaledSize(); });
+        document.getElementById('zoom-reset').addEventListener('click', () => { zoom = 1; updateScaledSize(); });
+
+        render();
+    </script>
+</body>
+</html>
